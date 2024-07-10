@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "veggie-pizza.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

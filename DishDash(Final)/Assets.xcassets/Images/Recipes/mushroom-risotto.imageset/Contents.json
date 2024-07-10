@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "mushroom-risotto.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

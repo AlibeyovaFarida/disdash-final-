@@ -1,0 +1,24 @@
+{
+  "originHash" : "18910713403076fb01eb9bdd4c9e9730ab2a02eefd384cefb45087df56c3ae88",
+  "pins" : [
+    {
+      "identity" : "revolvtabbar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/aykhanhajiyev/RevolvTabBar.git",
+      "state" : {
+        "revision" : "926bda2d7e1e51ab2a9806b45b7423c51097af6f",
+        "version" : "1.0.6"
+      }
+    },
+    {
+      "identity" : "snapkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SnapKit/SnapKit",
+      "state" : {
+        "revision" : "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
+        "version" : "5.7.1"
+      }
+    }
+  ],
+  "version" : 3
+}

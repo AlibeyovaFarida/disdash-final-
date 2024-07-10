@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "john_doe.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
