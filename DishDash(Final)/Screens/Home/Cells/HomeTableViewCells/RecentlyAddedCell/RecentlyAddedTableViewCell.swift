@@ -36,6 +36,7 @@ class RecentlyAddedTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
+        selectionStyle = .none
         recentlyAddedCollectionView.dataSource = self
         recentlyAddedCollectionView.delegate = self
     }
@@ -49,7 +50,7 @@ class RecentlyAddedTableViewCell: UITableViewCell {
         contentView.addSubview(recentlyAddedCollectionView)
         
         titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(19)
+            make.top.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(28)
         }
         

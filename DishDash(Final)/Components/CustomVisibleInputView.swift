@@ -24,7 +24,7 @@ class CustomVisibleInputView: UIView {
         return view
     }()
     
-    private let textField: UITextField = {
+    let textField: UITextField = {
         let tf = UITextField()
         tf.textColor = UIColor(named: "ComponenteBrownTextLight")
         tf.font = UIFont(name: "Poppins-Medium", size: 16)

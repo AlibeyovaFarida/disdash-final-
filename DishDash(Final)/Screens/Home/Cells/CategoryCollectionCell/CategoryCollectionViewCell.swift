@@ -15,12 +15,12 @@ class CategoryCollectionViewCell: UICollectionViewCell {
     }
     private let wrapperView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 15
+        view.layer.cornerRadius = 12.5
         return view
     }()
     private let categoryLabel: UILabel = {
         let lb = UILabel()
-        lb.font = UIFont(name: "LeagueSpartan-VariableFont_wght", size: 16)
+        lb.font = UIFont(name: "LeagueSpartan-Regular", size: 16)
         lb.textColor = UIColor(named: "RedPinkMain")
         return lb
     }()

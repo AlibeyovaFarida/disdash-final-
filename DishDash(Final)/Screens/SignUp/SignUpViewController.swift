@@ -1,6 +1,8 @@
 import UIKit
 import SnapKit
-
+import SPAlert
+import FirebaseAuth
+import FirebaseFirestore
 class SignUpViewController: UIViewController {
     private let myTitleLabel: UILabel = {
         let lb = UILabel()
@@ -112,9 +114,70 @@ class SignUpViewController: UIViewController {
     
     @objc
     private func signUpButtonTapped(){
+        guard let fullname = fullNameContainerView.textField.text, !fullname.isEmpty else {
+            showAlert(title: "Validation failed", message: "Fullname can't be empty")
+            return
+        }
+        guard let email = emailContainerView.textField.text, !email.isEmpty else {
+            showAlert(title: "Validation failed", message: "Email can't be empty")
+            return
+        }
+        guard let phoneNumber = phoneContainerView.textField.text, !phoneNumber.isEmpty else {
+            showAlert(title: "Validation failed", message: "Mobile number can't be empty")
+            return
+        }
+        guard let birthDate = birthdateContainerView.textField.text, !birthDate.isEmpty else {
+            showAlert(title: "Validation failed", message: "Date of birth can't be empty")
+            return
+        }
+        guard let password = passwordContainerView.textField.text, !password.isEmpty else {
+            showAlert(title: "Validation failed", message: "Password can't be empty")
+            return
+        }
+        guard let confirmPassword = confirmPasswordContainerView.textField.text, !confirmPassword.isEmpty else {
+            showAlert(title: "Validation failed", message: "Confirm Password can't be empty")
+            return
+        }
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] authDataResult, signUpError in
+            if let error = signUpError {
+                self?.showAlert(title: "Something went wrong", message: error.localizedDescription)
+            }
+            
+            let newUserInfo = Auth.auth().currentUser
+            if let userId = newUserInfo?.uid {
+                let db = Firestore.firestore()
+                db.collection("users").addDocument(data: ["fullname": fullname, "email": email, "phoneNumber": phoneNumber, "birthDate": birthDate, "userId": userId])
+            }
+        }
         let vc = LoginViewController()
-        vc.modalPresentationStyle = .fullScreen
-        present(vc, animated: true)
+        let overlayView = UIView(frame: self.view.bounds)
+            overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        let alertView = SPAlertView(title: "Sign up Succesful!", message: "Lorem ipsum dolor sit amet pretium cras id dui pellentesque ornare. Quisque malesuada.", preset: .custom(UIImage(named: "alert-user-icon")!))
+        alertView.layer.cornerRadius = 40
+        alertView.titleLabel?.font = UIFont(name: "Poppins-SemiBold", size: 20)
+        alertView.titleLabel?.textColor = UIColor(named: "ComponenteBrownText")
+        alertView.titleLabel?.textAlignment = .center
+        alertView.titleLabel?.numberOfLines = 0
+        alertView.titleLabel?.lineBreakMode = .byWordWrapping
+        alertView.subtitleLabel?.font = UIFont(name: "Poppis-Regular", size: 13)
+        alertView.subtitleLabel?.textColor = UIColor(named: "ComponenteBrownText")
+        alertView.layout.iconSize = .init(width: 82, height: 82)
+        alertView.layout.margins.top = 23
+        alertView.layout.margins.bottom = 23
+        alertView.layout.margins.left = 36
+        alertView.layout.margins.right = 30
+        alertView.layout.spaceBetweenIconAndTitle = 10
+        alertView.backgroundColor = UIColor(named: "WhiteBeige")
+        alertView.center = overlayView.center
+            overlayView.addSubview(alertView)
+            
+            // Add the overlay view to the main view
+            self.view.addSubview(overlayView)
+        alertView.present(haptic: .success)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+               vc.modalPresentationStyle = .fullScreen
+               self.present(vc, animated: true, completion: nil)
+           }
     }
     
     private func setupUI(){

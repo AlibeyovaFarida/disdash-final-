@@ -7,5 +7,5 @@
 
 struct CategoryNameItemModel {
     let name: String
-    let isSelected: Bool
+    var isSelected: Bool
 }

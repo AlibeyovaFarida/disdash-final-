@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,8 +21,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene);
         let navVC = UINavigationController(rootViewController: OnboardingAViewController());
 //        window?.rootViewController = EditProfileViewController();
-//        window?.rootViewController = CustomTabBarController()
-        window?.rootViewController = navVC
+        if Auth.auth().currentUser != nil {
+            window?.rootViewController = CustomTabBarController()
+        } else {
+            window?.rootViewController = navVC
+        }
+        
         window?.makeKeyAndVisible();
     }
 

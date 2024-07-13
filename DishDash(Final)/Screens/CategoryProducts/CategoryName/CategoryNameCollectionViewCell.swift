@@ -8,10 +8,13 @@
 import UIKit
 
 class CategoryNameCollectionViewCell: UICollectionViewCell {
-    
+    override var isSelected: Bool{
+        didSet{
+            changeState()
+        }
+    }
     private let bgView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "RedPinkMain")
         view.layer.cornerRadius = 12
         return view
     }()
@@ -42,10 +45,18 @@ class CategoryNameCollectionViewCell: UICollectionViewCell {
             make.center.equalToSuperview()
         }
     }
-    
+    private func changeState(){
+        if isSelected{
+            bgView.backgroundColor = UIColor(named: "RedPinkMain")
+            categoryNameLabel.textColor = UIColor(named: "WhiteBeige")
+        } else {
+            bgView.backgroundColor = .clear
+            categoryNameLabel.textColor = UIColor(named: "RedPinkMain")
+        }
+    }
     func configure(_ item: CategoryNameItemModel){
         categoryNameLabel.text = item.name
         bgView.backgroundColor = item.isSelected ? UIColor(named: "RedPinkMain") : .clear
-        categoryNameLabel.textColor = item.isSelected ? UIColor(named: "WhiteBeige") : UIColor(named: "RedPinkMain")
+        categoryNameLabel.textColor = item.isSelected ? UIColor(named: "WhiteBeige") :UIColor(named: "RedPinkMain")
     }
 }

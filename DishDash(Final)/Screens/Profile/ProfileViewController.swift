@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import FirebaseAuth
 class ProfileViewController: UIViewController {
     private let recipeList: [RecipeModel] = [
         .init(image: "crispy-shrimp", name: "Crispy Shrimp", description: "A feast for the senses", rating: 4, cookingTime: "20min"),
@@ -47,6 +47,21 @@ class ProfileViewController: UIViewController {
         btn.layer.cornerRadius = 14
         return btn
     }()
+    private let logoutButton: UIButton = {
+        let btn = UIButton()
+        btn.setImage(UIImage(named: "log-out"), for: .normal)
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.frame = CGRect(x: 0, y: 0, width: 28, height: 28)
+        btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(didTapLogOut), for: .touchUpInside)
+        return btn
+    }()
+    @objc
+    private func didTapLogOut(){
+        self.dismiss(animated: true) {
+            try? Auth.auth().signOut()
+        }
+    }
     private let descriptionStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
@@ -279,6 +294,7 @@ class ProfileViewController: UIViewController {
             profileCardDescriptionView
         ].forEach(profileCardStackView.addArrangedSubview)
         profileCardDescriptionView.addSubview(addRecipeButton)
+        profileCardDescriptionView.addSubview(logoutButton)
         profileCardDescriptionView.addSubview(descriptionStackView)
         [
             nameLabel,
@@ -344,6 +360,11 @@ class ProfileViewController: UIViewController {
             make.size.equalTo(28)
         }
         
+        logoutButton.snp.makeConstraints { make in
+            make.top.equalToSuperview()
+            make.trailing.equalTo(addRecipeButton.snp.leading).offset(-5)
+            make.size.equalTo(28)
+        }
         descriptionStackView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview().inset(15)
             make.leading.trailing.equalToSuperview()

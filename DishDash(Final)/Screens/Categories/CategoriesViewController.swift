@@ -63,10 +63,17 @@ class CategoriesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Categories"
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         categoriesCollectionView.dataSource = self
         setupUI()
     }
+    
     private func setupUI(){
         view.addSubview(scrollView)
         scrollView.addSubview(contentViewInScroll)

@@ -33,7 +33,7 @@ class CustomInvisibleInputView: UIView {
         return sv
     }()
     
-    private let textField: UITextField = {
+    let textField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "● ● ● ● ● ● ● ●"
         tf.isSecureTextEntry = true

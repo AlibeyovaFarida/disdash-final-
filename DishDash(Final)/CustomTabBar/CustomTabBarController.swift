@@ -5,22 +5,16 @@ final class CustomTabBarController: RevolvTabBar {
     
     private let homeNavVc: UINavigationController = {
         let vc = UINavigationController(rootViewController: CommunityViewController())
-//        vc.tabBarItem.image = UIImage(named: "Home")
-//        vc.tabBarItem.selectedImage = UIImage(named: "HomeSelected")
         return vc
     }()
     
     private let categoriesNavVc: UINavigationController = {
         let vc = UINavigationController(rootViewController: CategoriesViewController())
-//        vc.tabBarItem.image = UIImage(named: "Categories")
-//        vc.tabBarItem.selectedImage = UIImage(named: "CategoriesSelected")
         return vc
     }()
     
     private let communityNavVc: UINavigationController = {
         let vc = UINavigationController(rootViewController: HomeViewController())
-//        vc.tabBarItem.image = UIImage(named: "Community")
-//        vc.tabBarItem.selectedImage = UIImage(named: "CommunitySelected")
         return vc
     }()
     

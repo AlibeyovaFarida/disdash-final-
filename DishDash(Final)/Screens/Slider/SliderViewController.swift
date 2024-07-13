@@ -111,7 +111,7 @@ class SliderViewController: UIViewController {
         }
         if nextIndex == 3 {
             let vc = SignUpViewController()
-            vc.modalPresentationStyle = .fullScreen
+            vc.modalPresentationStyle = .overFullScreen
             present(vc, animated: true)
         }
     }

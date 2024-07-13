@@ -52,7 +52,8 @@ class TopChefTableViewCell: UITableViewCell {
         
         topChefCollectionView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.leading.trailing.bottom.equalToSuperview()
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview().inset(19)
             make.height.equalTo(94)
         }
     }

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import FirebaseAuth
 class LoginViewController: UIViewController {
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -105,8 +105,22 @@ class LoginViewController: UIViewController {
     }
     @objc
     private func loginButtonTapped(){
-        let tvc = CustomTabBarController()
-        UIApplication.shared.keyWindow?.rootViewController = tvc
+        guard let email = emailContainerView.textField.text, !email.isEmpty else{
+            showAlert(title: "Validation failed", message: "Email can't be empty")
+            return
+        }
+        guard let password = passwordContainerView.textField.text, !password.isEmpty else{
+            showAlert(title: "Validation failed", message: "Password can't be empty")
+            return
+        }
+        Auth.auth().signIn(withEmail: email, password: password) {[weak self] authDataResult, error in
+            if let error = error{
+                self?.showAlert(title: "Something went wrong", message: error.localizedDescription)
+                return
+            }
+            let tvc = CustomTabBarController()
+            UIApplication.shared.keyWindow?.rootViewController = tvc
+        }
     }
     @objc
     private func signUpTapped(){

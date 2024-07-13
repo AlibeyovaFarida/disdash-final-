@@ -67,7 +67,7 @@ class NotificationsViewController: UIViewController {
     private func setupUI(){
         view.addSubview(notificationsTableView)
         notificationsTableView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(33)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
             make.bottom.equalToSuperview()
         }

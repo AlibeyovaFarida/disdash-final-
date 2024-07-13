@@ -88,14 +88,15 @@ class HomeViewController: UIViewController {
     private let searchButton: UIButton = {
         let btn = UIButton()
         btn.setImage(UIImage(named: "search-button"), for: .normal)
-//        btn.addTarget(HomeViewController.self, action: #selector(didTapSearchButton), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
         return btn
     }()
-//    @objc
-//    private func didTapSearchButton(){
-//        let searchScreen = UIViewController()
-//        self.present(searchScreen, animated: true, completion: nil)
-//    }
+    @objc
+    private func didTapSearchButton(){
+        let searchVC = SearchViewController()
+        searchVC.modalPresentationStyle = .overFullScreen
+        present(searchVC, animated: false, completion: nil)
+    }
     private let categoryCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.estimatedItemSize = .init(width: 81, height: 15)
@@ -245,7 +246,8 @@ extension HomeViewController: UICollectionViewDataSource {
 
 extension HomeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        let vc = CategoryProductsViewController(categoryName: categoryList[indexPath.row].title)
+        navigationController?.pushViewController(vc, animated: false)
     }
 }
 

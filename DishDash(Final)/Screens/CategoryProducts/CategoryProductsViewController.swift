@@ -8,8 +8,9 @@
 import UIKit
 
 class CategoryProductsViewController: UIViewController {
-    private let categoryNameList: [CategoryNameItemModel] = [
-        .init(name: "Breakfast", isSelected: true),
+    private var categoryName: String = ""
+    private var categoryNameList: [CategoryNameItemModel] = [
+        .init(name: "Breakfast", isSelected: false),
         .init(name: "Lunch", isSelected: false),
         .init(name: "Dinner", isSelected: false),
         .init(name: "Vegan", isSelected: false),
@@ -52,23 +53,65 @@ class CategoryProductsViewController: UIViewController {
         return cv
     }()
     private let bottomShadowImageView = BottomShadowImageView()
+    
+    
+    init(categoryName: String){
+        super.init(nibName: nil, bundle: nil)
+        self.categoryName = categoryName
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
+        setupCustomBackButton()
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         categoryListCollectionView.backgroundColor = .clear
         categoryProductsCollectionView.backgroundColor = .clear
         categoryListCollectionView.dataSource = self
+        categoryListCollectionView.delegate = self
         categoryProductsCollectionView.dataSource = self
+        navigationItem.title = categoryName
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         setupUI()
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
-    
+    private func setupCustomBackButton() {
+        guard let backButtonImage = UIImage(named: "back-button") else {
+                print("Error: Back button image not found.")
+                return
+            }
+            
+        let backButton = UIButton(type: .custom)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+            
+        let backBarButtonItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarButtonItem
+            
+        backButton.snp.makeConstraints { make in
+            make.width.equalTo(22.4)
+            make.height.equalTo(14)
+        }
+    }
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
     private func setupUI(){
         view.addSubview(categoryListCollectionView)
         view.addSubview(categoryProductsCollectionView)
         view.addSubview(bottomShadowImageView)
         
         categoryListCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(36)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.height.equalTo(39)
         }
@@ -85,6 +128,14 @@ class CategoryProductsViewController: UIViewController {
         }
     }
 }
+extension CategoryProductsViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == categoryListCollectionView {
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        }
+    }
+    
+}
 extension CategoryProductsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == categoryListCollectionView {
@@ -98,7 +149,9 @@ extension CategoryProductsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == categoryListCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryNameCollectionViewCell.identifier, for: indexPath) as! CategoryNameCollectionViewCell
+            let item = categoryNameList[indexPath.row]
             cell.configure(categoryNameList[indexPath.row])
+            cell.isSelected = item.name == categoryName
             return cell
         }
         if collectionView == categoryProductsCollectionView {
