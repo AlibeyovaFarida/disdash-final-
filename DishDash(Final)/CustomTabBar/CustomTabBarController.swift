@@ -20,8 +20,6 @@ final class CustomTabBarController: RevolvTabBar {
     
     private let profileNavVc: UINavigationController = {
         let vc = UINavigationController(rootViewController: ProfileViewController())
-//        vc.tabBarItem.image = UIImage(named: "Profile")
-//        vc.tabBarItem.selectedImage = UIImage(named: "ProfileSelected")
         return vc
     }()
     
@@ -40,22 +38,11 @@ final class CustomTabBarController: RevolvTabBar {
     override var tabBarBackgroundColor: UIColor? {
             return UIColor(named: "RedPinkMain")
         }
-    // View Controllers-i tab bar-a əlavə edin
     override var viewControllers: [UIViewController] {
         [homeNavVc, categoriesNavVc, communityNavVc, profileNavVc]
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        setupTabBar()
     }
-    
-//    private func setupTabBar() {
-//        tabBar.layer.cornerRadius = 33
-//        tabBar.backgroundImage = UIImage()
-//        
-//        tabBar.tintColor = UIColor(named: "WhiteBeige") // Seçilmiş icon rəngi
-//        tabBar.unselectedItemTintColor = UIColor(named: "WhiteBeige")
-//        
-//    }
 }

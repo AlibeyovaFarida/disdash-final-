@@ -34,13 +34,15 @@
 		1837CB2A2C1650280092D025 /* TopChefTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1837CB292C1650280092D025 /* TopChefTableViewCell.swift */; };
 		1837CB2C2C1650500092D025 /* TopChefCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1837CB2B2C1650500092D025 /* TopChefCollectionViewCell.swift */; };
 		184290B32C318E110009B0AD /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184290B22C318E110009B0AD /* ProfileViewController.swift */; };
+		185489B42C4295D3006AB3EB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 185489B32C4295D3006AB3EB /* GoogleService-Info.plist */; };
+		185489B72C4297B2006AB3EB /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 185489B62C4297B2006AB3EB /* GoogleSignIn */; };
+		185489B92C4297B2006AB3EB /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 185489B82C4297B2006AB3EB /* GoogleSignInSwift */; };
 		185EBA5C2C16645700AA19E5 /* ChefModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 185EBA5B2C16645700AA19E5 /* ChefModel.swift */; };
 		18694A4F2C22CF77000327EE /* TrendingRecipeDetailAuthorTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18694A4E2C22CF77000327EE /* TrendingRecipeDetailAuthorTableViewCell.swift */; };
 		18694A532C22CFB8000327EE /* TrendingRecipeDetailDetailsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18694A522C22CFB8000327EE /* TrendingRecipeDetailDetailsTableViewCell.swift */; };
 		18694A562C22D01D000327EE /* TrendingRecipeDetailIngredientsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18694A552C22D01D000327EE /* TrendingRecipeDetailIngredientsTableViewCell.swift */; };
 		18694A592C22D0DE000327EE /* TrendingRecipeDetail6EasyStepsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18694A582C22D0DE000327EE /* TrendingRecipeDetail6EasyStepsTableViewCell.swift */; };
 		186DE70D2C410E8200BD8C2B /* SPAlert in Frameworks */ = {isa = PBXBuildFile; productRef = 186DE70C2C410E8200BD8C2B /* SPAlert */; };
-		186DE70F2C41357B00BD8C2B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 186DE70E2C41357B00BD8C2B /* GoogleService-Info.plist */; };
 		186DE7122C41369D00BD8C2B /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 186DE7112C41369D00BD8C2B /* FirebaseAnalytics */; };
 		186DE7142C41369D00BD8C2B /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 186DE7132C41369D00BD8C2B /* FirebaseAnalyticsOnDeviceConversion */; };
 		186DE7162C41369D00BD8C2B /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 186DE7152C41369D00BD8C2B /* FirebaseAnalyticsSwift */; };
@@ -188,12 +190,12 @@
 		1837CB292C1650280092D025 /* TopChefTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopChefTableViewCell.swift; sourceTree = "<group>"; };
 		1837CB2B2C1650500092D025 /* TopChefCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopChefCollectionViewCell.swift; sourceTree = "<group>"; };
 		184290B22C318E110009B0AD /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		185489B32C4295D3006AB3EB /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../GoogleService-Info.plist"; sourceTree = "<group>"; };
 		185EBA5B2C16645700AA19E5 /* ChefModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChefModel.swift; sourceTree = "<group>"; };
 		18694A4E2C22CF77000327EE /* TrendingRecipeDetailAuthorTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingRecipeDetailAuthorTableViewCell.swift; sourceTree = "<group>"; };
 		18694A522C22CFB8000327EE /* TrendingRecipeDetailDetailsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingRecipeDetailDetailsTableViewCell.swift; sourceTree = "<group>"; };
 		18694A552C22D01D000327EE /* TrendingRecipeDetailIngredientsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingRecipeDetailIngredientsTableViewCell.swift; sourceTree = "<group>"; };
 		18694A582C22D0DE000327EE /* TrendingRecipeDetail6EasyStepsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingRecipeDetail6EasyStepsTableViewCell.swift; sourceTree = "<group>"; };
-		186DE70E2C41357B00BD8C2B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		186DE7492C4145B300BD8C2B /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		1870C6632BFFBFB60030354F /* DishDash(Final).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DishDash(Final).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1870C6662BFFBFB60030354F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -291,12 +293,14 @@
 			files = (
 				186DE7262C41369D00BD8C2B /* FirebaseDatabaseSwift in Frameworks */,
 				186DE73E2C41369D00BD8C2B /* FirebasePerformance in Frameworks */,
+				185489B72C4297B2006AB3EB /* GoogleSignIn in Frameworks */,
 				186DE7402C41369D00BD8C2B /* FirebaseRemoteConfig in Frameworks */,
 				186DE7142C41369D00BD8C2B /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
 				186DE7382C41369D00BD8C2B /* FirebaseInstallations in Frameworks */,
 				186DE72C2C41369D00BD8C2B /* FirebaseFirestoreCombine-Community in Frameworks */,
 				186DE7362C41369D00BD8C2B /* FirebaseInAppMessagingSwift-Beta in Frameworks */,
 				1870C67C2BFFC10C0030354F /* SnapKit in Frameworks */,
+				185489B92C4297B2006AB3EB /* GoogleSignInSwift in Frameworks */,
 				186DE73A2C41369D00BD8C2B /* FirebaseMLModelDownloader in Frameworks */,
 				186DE73C2C41369D00BD8C2B /* FirebaseMessaging in Frameworks */,
 				186DE72E2C41369D00BD8C2B /* FirebaseFirestoreSwift in Frameworks */,
@@ -589,7 +593,7 @@
 				1870C6712BFFBFB70030354F /* LaunchScreen.storyboard */,
 				1870C66F2BFFBFB70030354F /* Assets.xcassets */,
 				1870C6742BFFBFB70030354F /* Info.plist */,
-				186DE70E2C41357B00BD8C2B /* GoogleService-Info.plist */,
+				185489B32C4295D3006AB3EB /* GoogleService-Info.plist */,
 			);
 			path = "DishDash(Final)";
 			sourceTree = "<group>";
@@ -1055,6 +1059,8 @@
 				186DE7452C41369D00BD8C2B /* FirebaseStorageCombine-Community */,
 				186DE7472C41369D00BD8C2B /* FirebaseVertexAI-Preview */,
 				186DE74C2C416EDE00BD8C2B /* RevolvTabBar */,
+				185489B62C4297B2006AB3EB /* GoogleSignIn */,
+				185489B82C4297B2006AB3EB /* GoogleSignInSwift */,
 			);
 			productName = "DishDash(Final)";
 			productReference = 1870C6632BFFBFB60030354F /* DishDash(Final).app */;
@@ -1089,6 +1095,7 @@
 				186DE70B2C410E8200BD8C2B /* XCRemoteSwiftPackageReference "SPAlert" */,
 				186DE7102C41369D00BD8C2B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				186DE74B2C416EDE00BD8C2B /* XCRemoteSwiftPackageReference "RevolvTabBar" */,
+				185489B52C4297B2006AB3EB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = 1870C6642BFFBFB60030354F /* Products */;
 			projectDirPath = "";
@@ -1121,7 +1128,7 @@
 				18AD8EFF2C0D054800EDEC93 /* LeagueSpartan-Bold.ttf in Resources */,
 				18739FB12C00835700CD4F60 /* Poppins-Thin.ttf in Resources */,
 				18739FAC2C00835700CD4F60 /* Poppins-ExtraBoldItalic.ttf in Resources */,
-				186DE70F2C41357B00BD8C2B /* GoogleService-Info.plist in Resources */,
+				185489B42C4295D3006AB3EB /* GoogleService-Info.plist in Resources */,
 				18739FAB2C00835700CD4F60 /* Poppins-BlackItalic.ttf in Resources */,
 				18AD8EFB2C0D054800EDEC93 /* LeagueSpartan-Medium.ttf in Resources */,
 				18B1738B2C0F41D400E3BF0C /* LeagueSpartan-VariableFont_wght.ttf in Resources */,
@@ -1445,6 +1452,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		185489B52C4297B2006AB3EB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.1.0;
+			};
+		};
 		186DE70B2C410E8200BD8C2B /* XCRemoteSwiftPackageReference "SPAlert" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ivanvorobei/SPAlert";
@@ -1480,6 +1495,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		185489B62C4297B2006AB3EB /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 185489B52C4297B2006AB3EB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		185489B82C4297B2006AB3EB /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 185489B52C4297B2006AB3EB /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		186DE70C2C410E8200BD8C2B /* SPAlert */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 186DE70B2C410E8200BD8C2B /* XCRemoteSwiftPackageReference "SPAlert" */;

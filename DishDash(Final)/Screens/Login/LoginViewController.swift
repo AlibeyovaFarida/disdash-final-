@@ -7,6 +7,10 @@
 
 import UIKit
 import FirebaseAuth
+import GoogleSignIn
+import FirebaseCore
+import FirebaseFirestore
+
 class LoginViewController: UIViewController {
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -74,6 +78,7 @@ class LoginViewController: UIViewController {
     private let googleImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named: "google")
+        iv.isUserInteractionEnabled = true
         return iv
     }()
     private let facebookImageView: UIImageView = {
@@ -95,6 +100,8 @@ class LoginViewController: UIViewController {
         return lb
     }()
     override func viewDidLoad() {
+        let tapGestureGoogle = UITapGestureRecognizer(target: self, action: #selector(didTapSignInGoogle))
+        googleImageView.addGestureRecognizer(tapGestureGoogle)
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
         signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(signUpTapped))
@@ -102,6 +109,37 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         setupUI()
+    }
+    @objc
+    private func didTapSignInGoogle(){
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+                
+        // Create Google Sign In configuration object.
+        let config = GIDConfiguration(clientID: clientID)
+                
+        GIDSignIn.sharedInstance.configuration = config
+        GIDSignIn.sharedInstance.signIn(withPresenting: self) { authentication, error in
+            if let error = error {
+                print("There is an error signing the user in ==> \(error)")
+                return
+            }
+            guard let user = authentication?.user, let idToken = user.idToken?.tokenString else {return}
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            Auth.auth().signIn(with: credential) { [weak self] authDataResult, error in
+                if let error = error{
+                    self?.showAlert(title: "Something went wrong", message: error.localizedDescription)
+                    return
+                }
+                let newUserInfo = authDataResult?.user
+                if let userId = newUserInfo?.uid {
+                    let db = Firestore.firestore()
+                    db.collection("users").addDocument(data: ["fullname": newUserInfo?.displayName, "email": newUserInfo?.email, "phoneNumber": newUserInfo?.phoneNumber, "birthDate": "", "userId": newUserInfo?.uid])
+                }
+                let tvc = CustomTabBarController()
+                UIApplication.shared.keyWindow?.rootViewController = tvc
+            }
+            
+        }
     }
     @objc
     private func loginButtonTapped(){

@@ -58,9 +58,17 @@ class ProfileViewController: UIViewController {
     }()
     @objc
     private func didTapLogOut(){
-        self.dismiss(animated: true) {
-            try? Auth.auth().signOut()
-        }
+        let loginViewController = LoginViewController()
+        loginViewController.modalPresentationStyle = .fullScreen
+        self.present(loginViewController, animated: true, completion: {
+        self.tabBarController?.dismiss(animated: false, completion: nil)
+            do{
+                try Auth.auth().signOut()
+                self.tabBarController?.view.removeFromSuperview()
+            } catch let signoutError as NSError {
+                self.showAlert(title: "SignOut error", message: signoutError.localizedDescription)
+            }
+        })
     }
     private let descriptionStackView: UIStackView = {
         let sv = UIStackView()
