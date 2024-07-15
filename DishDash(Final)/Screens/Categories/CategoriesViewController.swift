@@ -36,6 +36,7 @@ class CategoriesViewController: UIViewController {
         let iv = UIImageView()
         iv.clipsToBounds = true
         iv.layer.cornerRadius = 13
+        iv.isUserInteractionEnabled = true
         return iv
     }()
     private let categoriesCollectionView: UICollectionView = {
@@ -54,7 +55,8 @@ class CategoriesViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didSelectSeafoodCategory))
+        seafoodImageView.addGestureRecognizer(tapGesture)
         let db = Firestore.firestore()
         db.collection("categories").whereField("name", isEqualTo: "Seafood").getDocuments { querySnapshot, error in
             if let error = error {
@@ -91,7 +93,11 @@ class CategoriesViewController: UIViewController {
         categoriesCollectionView.delegate = self
         setupUI()
     }
-
+    @objc
+    private func didSelectSeafoodCategory(){
+        let vc = CategoryProductsViewController(categoryName: "Sea Food")
+        navigationController?.pushViewController(vc, animated: true)
+    }
     private func setupUI(){
         view.addSubview(scrollView)
         scrollView.addSubview(contentViewInScroll)

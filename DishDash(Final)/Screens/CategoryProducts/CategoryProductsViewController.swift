@@ -19,16 +19,7 @@ class CategoryProductsViewController: UIViewController {
         .init(name: "Drinks", isSelected: false),
         .init(name: "Sea Food", isSelected: false)
     ]
-    private var categoryProductsList: [RecipeModel] = [
-//        .init(image: "eggs-benedict", name: "Eggs Benedict", description: "Muffin with Canadian bacon", rating: 5, cookingTime: "15min"),
-//        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 5, cookingTime: "20min"),
-//        .init(image: "oatmeal-and-nut", name: "Oatmeal and Nut", description: "Wholesome blend for breakfast", rating: 4, cookingTime: "35min"),
-//        .init(image: "still-life-potato", name: "Still Life Potato", description: "Earthy, textured, rustic charm", rating: 4, cookingTime: "30min"),
-//        .init(image: "oatmeal-granola", name: "Oatmeal Granola", description: "Strawberries and Blueberries", rating: 4, cookingTime: "30min"),
-//        .init(image: "sunny-bruschetta", name: "Sunny Bruschetta", description: "With Cream Cheese", rating: 4, cookingTime: "30min"),
-//        .init(image: "omelette-cheese", name: "Omelette Cheese", description: "Fresh Parsley", rating: 4, cookingTime: "30min"),
-//        .init(image: "tofu-sandwich", name: "Tofu Sandwich", description: "Microgreens", rating: 4, cookingTime: "30min")
-    ]
+    private var categoryProductsList: [RecipeModel] = []
     private let categoryListCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -96,6 +87,7 @@ class CategoryProductsViewController: UIViewController {
         categoryListCollectionView.dataSource = self
         categoryListCollectionView.delegate = self
         categoryProductsCollectionView.dataSource = self
+        categoryProductsCollectionView.delegate = self
         navigationItem.title = categoryName
         if let navigationBar = self.navigationController?.navigationBar {
             let textAttributes: [NSAttributedString.Key: Any] = [
@@ -106,6 +98,7 @@ class CategoryProductsViewController: UIViewController {
         setupUI()
         navigationController?.setNavigationBarHidden(false, animated: false)
     }
+    
     private func setupCustomBackButton() {
         guard let backButtonImage = UIImage(named: "back-button") else {
                 print("Error: Back button image not found.")
@@ -155,6 +148,10 @@ extension CategoryProductsViewController: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == categoryListCollectionView {
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        }
+        if collectionView == categoryProductsCollectionView {
+            let vc = TrendingRecipesDetailViewController(productName: categoryProductsList[indexPath.row].name)
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
     

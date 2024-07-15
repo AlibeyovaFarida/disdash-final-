@@ -26,7 +26,7 @@ struct TrendingRecipeDetailModel: Hashable{
 typealias TrendingRecipeDetailDataSource = UITableViewDiffableDataSource<TrendingRecipeDetailSections, TrendingRecipeDetailModel>
 
 class TrendingRecipesDetailViewController: UIViewController {
-    
+    private var productName: String = ""
     private lazy var trendingRecipeDetailDataSource: TrendingRecipeDetailDataSource = makeTrendingRecipeDetailDataSource()
     private let trendingRecipeVideoView: UIView = {
         let view = UIView()
@@ -109,6 +109,7 @@ class TrendingRecipesDetailViewController: UIViewController {
     }()
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         trendingRecipeDetailTableView.separatorStyle = .none
@@ -116,7 +117,14 @@ class TrendingRecipesDetailViewController: UIViewController {
         trendingRecipeDetailTableView.dataSource = trendingRecipeDetailDataSource
         applySnapshot()
     }
+    init(productName: String){
+        super.init(nibName: nil, bundle: nil)
+        self.productName = productName
+    }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     private func setupUI(){
         view.addSubview(trendingRecipeVideoView)
         view.addSubview(trendingRecipeDetailTableView)
