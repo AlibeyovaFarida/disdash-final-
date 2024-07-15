@@ -7,5 +7,5 @@
 
 struct CategoryItemModel {
     let image: String
-    let title: String
+    let name: String
 }

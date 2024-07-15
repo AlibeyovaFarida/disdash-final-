@@ -38,6 +38,7 @@ class EditProfileViewController: UIViewController, UINavigationControllerDelegat
         setupUI()
     }
     private func setupUI(){
+        setupCustomBackButton()
         view.addSubview(profileImageView)
         view.addSubview(inputsStackView)
         [
@@ -57,10 +58,33 @@ class EditProfileViewController: UIViewController, UINavigationControllerDelegat
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
         }
         saveButton.snp.makeConstraints { make in
-            make.top.equalTo(inputsStackView.snp.bottom).offset(126)
+            make.top.equalTo(inputsStackView.snp.bottom).offset(80)
             make.centerX.equalTo(view.safeAreaLayoutGuide)
         }
     }
+    private func setupCustomBackButton() {
+        guard let backButtonImage = UIImage(named: "back-button") else {
+                print("Error: Back button image not found.")
+                return
+            }
+            
+        let backButton = UIButton(type: .custom)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+            
+        let backBarButtonItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarButtonItem
+            
+        backButton.snp.makeConstraints { make in
+            make.width.equalTo(22.4)
+            make.height.equalTo(14)
+        }
+    }
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
+
     @objc
     private func didImagePicker(){
         let alertVC = UIAlertController(title: "Select image", message: nil, preferredStyle: .actionSheet)

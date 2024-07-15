@@ -6,16 +6,10 @@
 //
 
 import UIKit
+import Firebase
 
 class CategoriesViewController: UIViewController {
-    private let categoriesList: [CategoryItemModel] = [
-        .init(image: "lunch", title: "Lunch"),
-        .init(image: "breakfast", title: "Breakfast"),
-        .init(image: "dinner", title: "Dinner"),
-        .init(image: "vegan", title: "Vegan"),
-        .init(image: "dessert-macaron", title: "Dessert"),
-        .init(image: "drinks", title: "Drinks")
-    ]
+    private var categoriesList: [CategoryItemModel] = []
     private let scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.showsVerticalScrollIndicator = false
@@ -33,7 +27,6 @@ class CategoriesViewController: UIViewController {
     }()
     private let seafoodLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "Seafood"
         lb.font = UIFont(name: "Poppins-Medium", size: 14)
         lb.textColor = UIColor(named: "TextColorBrown")
         lb.textAlignment = .center
@@ -41,7 +34,6 @@ class CategoriesViewController: UIViewController {
     }()
     private let seafoodImageView: UIImageView = {
         let iv = UIImageView()
-        iv.image = UIImage(named: "seafood-categories")
         iv.clipsToBounds = true
         iv.layer.cornerRadius = 13
         return iv
@@ -62,6 +54,31 @@ class CategoriesViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("categories").whereField("name", isEqualTo: "Seafood").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    self.seafoodLabel.text = (document.data()["name"] as! String)
+                    self.seafoodImageView.kf.setImage(with: URL(string: document.data()["image"] as! String))
+                }
+            }
+        }
+        db.collection("categories").whereField("name", isNotEqualTo: "Seafood").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    self.categoriesList.append(CategoryItemModel(image: document.data()["image"] as! String, name: document.data()["name"] as! String))
+                }
+                DispatchQueue.main.async {
+                    self.categoriesCollectionView.reloadData()
+                }
+            }
+        }
+        
         navigationItem.title = "Categories"
         if let navigationBar = self.navigationController?.navigationBar {
             let textAttributes: [NSAttributedString.Key: Any] = [
@@ -71,9 +88,10 @@ class CategoriesViewController: UIViewController {
         }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         categoriesCollectionView.dataSource = self
+        categoriesCollectionView.delegate = self
         setupUI()
     }
-    
+
     private func setupUI(){
         view.addSubview(scrollView)
         scrollView.addSubview(contentViewInScroll)
@@ -117,4 +135,9 @@ extension CategoriesViewController: UICollectionViewDataSource{
         return cell
     }
 }
-
+extension CategoriesViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = CategoryProductsViewController(categoryName: categoriesList[indexPath.row].name)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+}

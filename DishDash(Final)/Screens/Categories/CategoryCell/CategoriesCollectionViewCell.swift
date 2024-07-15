@@ -48,7 +48,7 @@ class CategoriesCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(_ item: CategoryItemModel){
-        categoryImageView.image = UIImage(named: item.image)
-        categoryLabel.text = item.title
+        categoryImageView.kf.setImage(with: URL(string: item.image))
+        categoryLabel.text = item.name
     }
 }

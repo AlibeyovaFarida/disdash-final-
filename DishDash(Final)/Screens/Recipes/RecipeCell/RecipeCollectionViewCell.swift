@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import Kingfisher
 class RecipeCollectionViewCell: UICollectionViewCell {
     private let recipeView: UIView = {
         let view = UIView()
@@ -154,7 +154,7 @@ class RecipeCollectionViewCell: UICollectionViewCell {
         }
     }
     func configure(_ item: RecipeModel){
-        recipeImageView.image = UIImage(named: item.image)
+        recipeImageView.kf.setImage(with: URL(string: item.image))
         recipeNameLabel.text = item.name
         recipeDescriptionLabel.text = item.description
         ratingLabel.text = "\(item.rating)"

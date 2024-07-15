@@ -9,12 +9,12 @@ import UIKit
 
 class FavoriteCategoryProductsViewController: UIViewController {
     private let recipeList: [RecipeModel] = [
-        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 5, cookingTime: "20min"),
-        .init(image: "fruit-crepes", name: "Fruit Crepes", description: "Fruity-filled chocolate crepes", rating: 4, cookingTime: "20min"),
-        .init(image: "macarons", name: "Macarons", description: "Delicate, colorful French macarons", rating: 4, cookingTime: "30min"),
-        .init(image: "spring-cupcake", name: "Spring Cupcake", description: "Fresh, spring-themed cupcake sweetness", rating: 4, cookingTime: "30min"),
-        .init(image: "cheesecake", name: "Cheesecake", description: "Creamy strawberry cheesecake bliss", rating: 4, cookingTime: "30min"),
-        .init(image: "iced-coffee", name: "Iced Coffee", description: "Chilled indulgence in iced coffee", rating: 4, cookingTime: "30min")
+//        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 5, cookingTime: "20min"),
+//        .init(image: "fruit-crepes", name: "Fruit Crepes", description: "Fruity-filled chocolate crepes", rating: 4, cookingTime: "20min"),
+//        .init(image: "macarons", name: "Macarons", description: "Delicate, colorful French macarons", rating: 4, cookingTime: "30min"),
+//        .init(image: "spring-cupcake", name: "Spring Cupcake", description: "Fresh, spring-themed cupcake sweetness", rating: 4, cookingTime: "30min"),
+//        .init(image: "cheesecake", name: "Cheesecake", description: "Creamy strawberry cheesecake bliss", rating: 4, cookingTime: "30min"),
+//        .init(image: "iced-coffee", name: "Iced Coffee", description: "Chilled indulgence in iced coffee", rating: 4, cookingTime: "30min")
     ]
     private let productsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()

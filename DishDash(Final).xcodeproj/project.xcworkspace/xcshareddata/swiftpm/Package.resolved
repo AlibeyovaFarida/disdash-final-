@@ -1,5 +1,5 @@
 {
-  "originHash" : "357de402a458dd32ba0409eeaa70846c632053727f53be5ee361e77ebc4d30df",
+  "originHash" : "2cc64363c87312235fbbbd233dc7ebda7323cf9bf5942474913c2cb6d34fd41b",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -110,6 +110,15 @@
       }
     },
     {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "2ef543ee21d63734e1c004ad6c870255e8716c50",
+        "version" : "7.12.0"
+      }
+    },
+    {
       "identity" : "leveldb",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/leveldb.git",
@@ -141,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/aykhanhajiyev/RevolvTabBar.git",
       "state" : {
-        "revision" : "926bda2d7e1e51ab2a9806b45b7423c51097af6f",
-        "version" : "1.0.6"
+        "revision" : "4cc4987440035847e44ef1e77b3c0e7b9d22a974",
+        "version" : "1.0.9"
       }
     },
     {

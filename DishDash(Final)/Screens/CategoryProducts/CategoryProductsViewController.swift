@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Firebase
 
 class CategoryProductsViewController: UIViewController {
     private var categoryName: String = ""
@@ -18,15 +19,15 @@ class CategoryProductsViewController: UIViewController {
         .init(name: "Drinks", isSelected: false),
         .init(name: "Sea Food", isSelected: false)
     ]
-    private let categoryProductsList: [RecipeModel] = [
-        .init(image: "eggs-benedict", name: "Eggs Benedict", description: "Muffin with Canadian bacon", rating: 5, cookingTime: "15min"),
-        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 5, cookingTime: "20min"),
-        .init(image: "oatmeal-and-nut", name: "Oatmeal and Nut", description: "Wholesome blend for breakfast", rating: 4, cookingTime: "35min"),
-        .init(image: "still-life-potato", name: "Still Life Potato", description: "Earthy, textured, rustic charm", rating: 4, cookingTime: "30min"),
-        .init(image: "oatmeal-granola", name: "Oatmeal Granola", description: "Strawberries and Blueberries", rating: 4, cookingTime: "30min"),
-        .init(image: "sunny-bruschetta", name: "Sunny Bruschetta", description: "With Cream Cheese", rating: 4, cookingTime: "30min"),
-        .init(image: "omelette-cheese", name: "Omelette Cheese", description: "Fresh Parsley", rating: 4, cookingTime: "30min"),
-        .init(image: "tofu-sandwich", name: "Tofu Sandwich", description: "Microgreens", rating: 4, cookingTime: "30min")
+    private var categoryProductsList: [RecipeModel] = [
+//        .init(image: "eggs-benedict", name: "Eggs Benedict", description: "Muffin with Canadian bacon", rating: 5, cookingTime: "15min"),
+//        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 5, cookingTime: "20min"),
+//        .init(image: "oatmeal-and-nut", name: "Oatmeal and Nut", description: "Wholesome blend for breakfast", rating: 4, cookingTime: "35min"),
+//        .init(image: "still-life-potato", name: "Still Life Potato", description: "Earthy, textured, rustic charm", rating: 4, cookingTime: "30min"),
+//        .init(image: "oatmeal-granola", name: "Oatmeal Granola", description: "Strawberries and Blueberries", rating: 4, cookingTime: "30min"),
+//        .init(image: "sunny-bruschetta", name: "Sunny Bruschetta", description: "With Cream Cheese", rating: 4, cookingTime: "30min"),
+//        .init(image: "omelette-cheese", name: "Omelette Cheese", description: "Fresh Parsley", rating: 4, cookingTime: "30min"),
+//        .init(image: "tofu-sandwich", name: "Tofu Sandwich", description: "Microgreens", rating: 4, cookingTime: "30min")
     ]
     private let categoryListCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -67,6 +68,28 @@ class CategoryProductsViewController: UIViewController {
     override func viewDidLoad() {
         setupCustomBackButton()
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("recipes").whereField("category", isEqualTo: categoryName).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    self.categoryProductsList.append(RecipeModel(
+                        name: document.data()["name"] as! String,
+                        image: document.data()["image"] as! String,
+                        description: document.data()["description"] as! String,
+                        rating: document.data()["rating"] as! Int,
+                        cookingTime: document.data()["cookingTime"] as! String))
+                }
+                DispatchQueue.main.async {
+                    self.categoryProductsCollectionView.reloadData()
+                }
+            }
+        }
+        
+        
+        
         view.backgroundColor = UIColor(named: "WhiteBeige")
         categoryListCollectionView.backgroundColor = .clear
         categoryProductsCollectionView.backgroundColor = .clear

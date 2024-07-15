@@ -4,7 +4,7 @@ import RevolvTabBar
 final class CustomTabBarController: RevolvTabBar {
     
     private let homeNavVc: UINavigationController = {
-        let vc = UINavigationController(rootViewController: CommunityViewController())
+        let vc = UINavigationController(rootViewController: HomeViewController())
         return vc
     }()
     
@@ -14,7 +14,7 @@ final class CustomTabBarController: RevolvTabBar {
     }()
     
     private let communityNavVc: UINavigationController = {
-        let vc = UINavigationController(rootViewController: HomeViewController())
+        let vc = UINavigationController(rootViewController: CommunityViewController())
         return vc
     }()
     

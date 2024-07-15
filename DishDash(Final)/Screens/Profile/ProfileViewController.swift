@@ -9,12 +9,12 @@ import UIKit
 import FirebaseAuth
 class ProfileViewController: UIViewController {
     private let recipeList: [RecipeModel] = [
-        .init(image: "crispy-shrimp", name: "Crispy Shrimp", description: "A feast for the senses", rating: 4, cookingTime: "20min"),
-        .init(image: "chicken-wings", name: "Chicken Wings", description: "Delicious and juicy wings", rating: 5, cookingTime: "30min"),
-        .init(image: "colors-macarons", name: "Colors Macarons", description: "Sweet bites full of elegance", rating: 4, cookingTime: "40min"),
-        .init(image: "pina-colada", name: "Pina Colada", description: "A tropical explosion in every sip", rating: 4, cookingTime: "30min"),
-        .init(image: "spring-rolls", name: "Spring Rolls", description: "Delicate and full of flavor", rating: 4, cookingTime: "30min"),
-        .init(image: "french-toast", name: "French Toast", description: "Delicious slices of bread", rating: 4, cookingTime: "30min")
+        .init(name: "Crispy Shrimp", image: "crispy-shrimp", description: "A feast for the senses", rating: 4, cookingTime: "20min"),
+        .init(name: "Chicken Wings", image: "chicken-wings", description: "Delicious and juicy wings", rating: 5, cookingTime: "30min"),
+        .init(name: "Colors Macarons", image: "colors-macarons", description: "Sweet bites full of elegance", rating: 4, cookingTime: "40min"),
+        .init(name: "Pina Colada", image: "pina-colada", description: "A tropical explosion in every sip", rating: 4, cookingTime: "30min"),
+        .init(name: "Spring Rolls", image: "spring-rolls", description: "Delicate and full of flavor", rating: 4, cookingTime: "30min"),
+        .init(name: "French Toast", image: "french-toast", description: "Delicious slices of bread", rating: 4, cookingTime: "30min")
     ]
     
     private let favoritesCategoryList: [FavoritesCategoryItemModel] = [
@@ -111,8 +111,14 @@ class ProfileViewController: UIViewController {
         btn.layer.cornerRadius = 13.5
         btn.frame = CGRect(x: 0, y: 0, width: 175, height: 27)
         btn.titleLabel?.font = UIFont(name: "Poppins-Medium", size: 15)
+        btn.addTarget(self, action: #selector(didTapEditButton), for: .touchUpInside)
         return btn
     }()
+    @objc
+    private func didTapEditButton(){
+        let vc = EditProfileViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
     private let shareButton: UIButton = {
         let btn = UIButton()
         btn.setTitle("Share Profile", for: .normal)
@@ -294,7 +300,6 @@ class ProfileViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
     }
-    
     private func setupUI(){
         view.addSubview(profileCardStackView)
         [

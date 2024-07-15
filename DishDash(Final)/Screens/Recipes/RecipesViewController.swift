@@ -9,14 +9,14 @@ import UIKit
 
 class RecipesViewController: UIViewController {
     private let recipeList: [RecipeModel] = [
-        .init(image: "beans-burger", name: "Beans Burger", description: "Veggie-packed bean burger patty", rating: 4, cookingTime: "30min"),
-        .init(image: "broccoli-lasagna", name: "Broccoli Lasagna", description: "Cheesy broccoli-filled lasagna layers", rating: 4, cookingTime: "30min"),
-        .init(image: "egg-plant-gratin", name: "Egg Plant Gratin", description: "Oven-baked eggplant with savory gratin", rating: 4, cookingTime: "30min"),
-        .init(image: "quinoa-salad", name: "Quinoa Salad", description: "Nutrient-rich quinoa tossed in salad", rating: 4, cookingTime: "30min"),
-        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
-        .init(image: "falafel-salad", name: "Falafel Salad", description: "Crisp falafel atop fresh salad greens", rating: 4, cookingTime: "30min"),
-        .init(image: "veggie-pizza", name: "Veggie Pizza", description: "Colorful veggie-topped pizza pie", rating: 4, cookingTime: "30min"),
-        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
+//        .init(image: "beans-burger", name: "Beans Burger", description: "Veggie-packed bean burger patty", rating: 4, cookingTime: "30min"),
+//        .init(image: "broccoli-lasagna", name: "Broccoli Lasagna", description: "Cheesy broccoli-filled lasagna layers", rating: 4, cookingTime: "30min"),
+//        .init(image: "egg-plant-gratin", name: "Egg Plant Gratin", description: "Oven-baked eggplant with savory gratin", rating: 4, cookingTime: "30min"),
+//        .init(image: "quinoa-salad", name: "Quinoa Salad", description: "Nutrient-rich quinoa tossed in salad", rating: 4, cookingTime: "30min"),
+//        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
+//        .init(image: "falafel-salad", name: "Falafel Salad", description: "Crisp falafel atop fresh salad greens", rating: 4, cookingTime: "30min"),
+//        .init(image: "veggie-pizza", name: "Veggie Pizza", description: "Colorful veggie-topped pizza pie", rating: 4, cookingTime: "30min"),
+//        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
     ]
     private let recipesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()

@@ -6,9 +6,9 @@
 //
 
 struct RecipeModel{
-    let image: String
-    let name: String
-    let description: String
-    let rating: Int
-    let cookingTime: String
+        let name: String
+        let image: String
+        let description: String
+        let rating: Int
+        let cookingTime: String
 }

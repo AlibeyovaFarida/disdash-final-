@@ -13,14 +13,14 @@ class YourRecipesViewController: UIViewController {
         .init(image: "tiramisu", title: "Tiramisu", rating: 5, time: 15)
     ]
     private let recipesList: [RecipeModel] = [
-        .init(image: "bechamel-pasta", name: "Béchamel  Pasta", description: "A creamy and indulgent", rating: 4, cookingTime: "30min"),
-        .init(image: "grilled-skewers", name: "Grilled Skewers", description: "Succulent morsels", rating: 4, cookingTime: "30min"),
-        .init(image: "nut-brownie", name: "Nut brownie", description: "Is a rich and indulgent dessert...", rating: 4, cookingTime: "30min"),
-        .init(image: "oatmeal-pancakes", name: "Oatmeal pancakes", description: "These nutritious delights offer a satisfyingly...", rating: 4, cookingTime: "30min"),
-        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
-        .init(image: "waffles", name: "Waffles", description: "They're fluffy on the inside, perfect...", rating: 4, cookingTime: "30min"),
-        .init(image: "iced-coffee", name: "Iced Coffee", description: "A refreshing blend of chilled coffee...", rating: 4, cookingTime: "30min"),
-        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
+//        .init(image: "bechamel-pasta", name: "Béchamel  Pasta", description: "A creamy and indulgent", rating: 4, cookingTime: "30min"),
+//        .init(image: "grilled-skewers", name: "Grilled Skewers", description: "Succulent morsels", rating: 4, cookingTime: "30min"),
+//        .init(image: "nut-brownie", name: "Nut brownie", description: "Is a rich and indulgent dessert...", rating: 4, cookingTime: "30min"),
+//        .init(image: "oatmeal-pancakes", name: "Oatmeal pancakes", description: "These nutritious delights offer a satisfyingly...", rating: 4, cookingTime: "30min"),
+//        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
+//        .init(image: "waffles", name: "Waffles", description: "They're fluffy on the inside, perfect...", rating: 4, cookingTime: "30min"),
+//        .init(image: "iced-coffee", name: "Iced Coffee", description: "A refreshing blend of chilled coffee...", rating: 4, cookingTime: "30min"),
+//        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
     ]
     private let mostViewedTodayView: UIView = {
         let view = UIView()
