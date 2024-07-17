@@ -6,14 +6,10 @@
 //
 
 import UIKit
+import Firebase
 
 class TrendingRecipesViewController: UIViewController {
-    private let trendingRecipesList: [TrendingRecipeItemModel] = [
-        .init(image: "trending-chicken-curry", name: "Chicken Curry", description: "Savor the aromatic Chicken Curry—a rich blend of spices...", chefName: "By Chef Josh Ryan", time: 45, level: "Easy", rating: 4),
-        .init(image: "trending-chicken-burger", name: "Chicken Burger", description: "Indulge in a flavorful Chicken Burger: seasoned chicken...", chefName: "By Chef Andrew", time: 15, level: "Medium", rating: 5),
-        .init(image: "trending-tiramisu", name: "Tiramisu", description: "Mix the flours, salt, cinnamon and baking powder...", chefName: "By Chef Andrew", time: 30, level: "Hard", rating: 5),
-        .init(image: "trending-tofu-sandwich", name: "Tofu Sandwich", description: "Mix the flours, salt, cinnamon and baking powder...", chefName: "By Chef Jhon", time: 30, level: "Easy", rating: 4)
-    ]
+    private var trendingRecipesList: [TrendingRecipeItemModel] = []
     private let mostViewedTodayView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 20
@@ -36,6 +32,7 @@ class TrendingRecipesViewController: UIViewController {
     }()
     private let mostViewedTodayRecipeView: UIView = {
         let view = UIView()
+        view.isUserInteractionEnabled = true
         return view
     }()
     private let mostViewedTodayRecipeImageView: UIImageView = {
@@ -144,10 +141,43 @@ class TrendingRecipesViewController: UIViewController {
     override func viewDidLoad() {
         setupCustomBackButton()
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("recipes").whereField("rating", isEqualTo: 5).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    if let chef = document.data()["chef"] as? [String:String]{
+                        self.trendingRecipesList.append(TrendingRecipeItemModel(
+                            image: document.data()["image"] as! String,
+                            name: document.data()["name"] as! String,
+                            description: document.data()["description"] as! String,
+                            chefName: chef["name"]!,
+                            time: document.data()["cookingTime"] as! String,
+                            level: document.data()["level"] as! String,
+                            rating: document.data()["rating"] as! Int))
+                    } else {
+                        print("Server error")
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.trendingRecipesCollectionView.reloadData()
+                }
+            }
+        }
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didSelectMostViewedRecipe))
+        mostViewedTodayRecipeView.addGestureRecognizer(tapGesture)
         view.backgroundColor = UIColor(named: "WhiteBeige")
         trendingRecipesCollectionView.dataSource = self
+        trendingRecipesCollectionView.delegate = self
         setupUI()
         navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    @objc
+    private func didSelectMostViewedRecipe(){
+        let vc = TrendingRecipesDetailViewController(productName: "Salami Pizza")
+        navigationController?.pushViewController(vc, animated: true)
     }
     private func setupCustomBackButton() {
         guard let backButtonImage = UIImage(named: "back-button") else {
@@ -255,5 +285,11 @@ extension TrendingRecipesViewController: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrendingRecipeCollectionViewCell.identifier, for: indexPath) as! TrendingRecipeCollectionViewCell
         cell.configure(trendingRecipesList[indexPath.row])
         return cell
+    }
+}
+extension TrendingRecipesViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = TrendingRecipesDetailViewController(productName: trendingRecipesList[indexPath.row].name)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

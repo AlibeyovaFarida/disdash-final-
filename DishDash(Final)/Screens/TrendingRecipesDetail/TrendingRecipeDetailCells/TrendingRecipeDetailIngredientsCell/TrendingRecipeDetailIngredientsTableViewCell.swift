@@ -9,7 +9,7 @@ import UIKit
 
 class TrendingRecipeDetailIngredientsTableViewCell: UITableViewCell {
     private var height = 0
-    private var ingredientList: [IngredientItemModel] = []
+    private var ingredientList: [String] = []
 
     private let titleLabel: UILabel = {
         let lb = UILabel()
@@ -50,7 +50,7 @@ class TrendingRecipeDetailIngredientsTableViewCell: UITableViewCell {
             make.height.equalTo(height)
         }
     }
-    func configure(_ items: [IngredientItemModel]){
+    func configure(_ items: [String]){
         ingredientList = items
         ingredientsTableView.reloadData()
         adjustCollectionViewHeight()

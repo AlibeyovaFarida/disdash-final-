@@ -9,7 +9,7 @@ import Foundation
 struct CommunityCardModel{
     let authorImage: String
     let username: String
-    let time: String
+    let time: Date
     let recipeImage: String
     let recipeName: String
     let rating: Int

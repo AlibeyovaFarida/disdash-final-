@@ -6,6 +6,6 @@
 //
 
 struct IngredientItemModel: Equatable{
-    let quantity: String
+//    let quantity: String
     let ingredient: String
 }

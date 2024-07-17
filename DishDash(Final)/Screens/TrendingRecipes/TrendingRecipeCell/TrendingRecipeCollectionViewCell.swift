@@ -175,11 +175,11 @@ class TrendingRecipeCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(_ item: TrendingRecipeItemModel){
-        trendingRecipeImageView.image = UIImage(named: item.image)
+        trendingRecipeImageView.kf.setImage(with: URL(string: item.image))
         trendingRecipeTitleLabel.text = item.name
         trendingRecipeDescriptionLabel.text = item.description
         trendingRecipeChefNameLabel.text = item.chefName
-        trendingRecipeCookingTimeLabel.text = "\(item.time)min"
+        trendingRecipeCookingTimeLabel.text = item.time
         trendingRecipeLevelLabel.text = "\(item.level)"
         trendingRecipeRatingLabel.text = "\(item.rating)"
     }

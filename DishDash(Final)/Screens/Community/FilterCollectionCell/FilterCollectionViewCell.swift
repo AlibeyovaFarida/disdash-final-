@@ -8,6 +8,11 @@
 import UIKit
 
 class FilterCollectionViewCell: UICollectionViewCell {
+    override var isSelected: Bool{
+        didSet{
+            changeState()
+        }
+    }
     private let filterView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(named: "RedPinkMain")
@@ -41,6 +46,15 @@ class FilterCollectionViewCell: UICollectionViewCell {
         filterLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(9)
+        }
+    }
+    private func changeState(){
+        if isSelected{
+            filterView.backgroundColor = UIColor(named: "RedPinkMain")
+            filterLabel.textColor = UIColor(named: "WhiteBeige")
+        } else {
+            filterView.backgroundColor = .clear
+            filterLabel.textColor = UIColor(named: "RedPinkMain")
         }
     }
     func configure(_ item: FilterChoiseModel){

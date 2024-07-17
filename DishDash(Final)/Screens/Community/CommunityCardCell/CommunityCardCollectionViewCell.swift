@@ -23,7 +23,7 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
     }()
     private let authorImageView: UIImageView = {
         let iv = UIImageView()
-        iv.clipsToBounds = false
+        iv.clipsToBounds = true
         iv.layer.cornerRadius = 17.5
         return iv
     }()
@@ -45,6 +45,12 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         lb.textColor = UIColor(named: "PinkSubColor")
         return lb
     }()
+    private let dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .short
+            return formatter
+        }()
     private let communityRecipeCardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 14
@@ -255,10 +261,10 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         }
     }
     func configure(_ item: CommunityCardModel){
-        authorImageView.image = UIImage(named: item.authorImage)
+        authorImageView.kf.setImage(with: URL(string: item.authorImage))
         usernameLabel.text = item.username
-        timeLabel.text = item.time
-        communityRecipeImageView.image = UIImage(named: item.recipeImage)
+        timeLabel.text = dateFormatter.string(from: item.time)
+        communityRecipeImageView.kf.setImage(with: URL(string: item.recipeImage))
         recipeNameLabel.text = item.recipeName
         ratingLabel.text = "\(item.rating)"
         descriptionLabel.text = item.description

@@ -7,6 +7,6 @@
 
 struct FilterChoiseModel{
     let name: String
-    let isSelected: Bool
+    var isSelected: Bool
 }
 

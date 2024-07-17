@@ -8,11 +8,6 @@
 import UIKit
 
 class CategoryNameCollectionViewCell: UICollectionViewCell {
-    override var isSelected: Bool{
-        didSet{
-            changeState()
-        }
-    }
     private let bgView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 12
@@ -43,15 +38,6 @@ class CategoryNameCollectionViewCell: UICollectionViewCell {
         
         categoryNameLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
-        }
-    }
-    private func changeState(){
-        if isSelected{
-            bgView.backgroundColor = UIColor(named: "RedPinkMain")
-            categoryNameLabel.textColor = UIColor(named: "WhiteBeige")
-        } else {
-            bgView.backgroundColor = .clear
-            categoryNameLabel.textColor = UIColor(named: "RedPinkMain")
         }
     }
     func configure(_ item: CategoryNameItemModel){

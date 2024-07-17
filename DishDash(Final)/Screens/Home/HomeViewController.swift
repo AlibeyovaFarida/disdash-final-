@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import Firebase
 
 enum HomeSection{
     case trendingRecipe
@@ -27,8 +28,8 @@ struct HomeModel: Hashable {
 
 typealias HomeDataSource = UITableViewDiffableDataSource<HomeSection, HomeModel>
 
-class HomeViewController: UIViewController {
-    
+class HomeViewController: UIViewController{
+    private var recentlyAddedProducts: [RecentlyAddedModel] = []
     private lazy var homeDataSource: HomeDataSource = makeHomeDataSource()
     
     private let categoryList: [CategoryModel] = [
@@ -122,6 +123,26 @@ class HomeViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("recipes").order(by: "date", descending: true).limit(to: 6).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    self.recentlyAddedProducts.append(RecentlyAddedModel(
+                        image: document.data()["image"] as! String,
+                        name: document.data()["name"] as! String,
+                        description: document.data()["description"] as! String,
+                        rating: document.data()["rating"] as! Int,
+                        time: document.data()["cookingTime"] as! String))
+                }
+                DispatchQueue.main.async {
+                    self.applySnapshot()
+                }
+            }
+        }
+        
         view.backgroundColor = UIColor(named: "WhiteBeige")
         self.navigationController?.setNavigationBarHidden(true, animated: true)
         categoryCollectionView.backgroundColor = .clear
@@ -222,14 +243,7 @@ class HomeViewController: UIViewController {
             .init(image: "andrew", name: "Andrew"),
             .init(image: "emily", name: "Emily"),
             .init(image: "jessica", name: "Jessica")], recentlyAdded: [])], toSection: .topChef)
-        snapshot.appendItems([.init(yourRecipes: [], topChef: [], recentlyAdded: [
-            .init(image: "tacos", name: "Tacos", description: "Spicy and delicious", rating: 4, time: 30),
-            .init(image: "lemonade", name: "Lemonade", description: "Acidic and refreshing", rating: 4, time: 30),
-            .init(image: "chicken-burger-2", name: "Chicken Burger", description: "Crunchy bread", rating: 5, time: 15),
-            .init(image: "tacos", name: "Tacos", description: "Spicy and delicious", rating: 4, time: 30),
-            .init(image: "lemonade", name: "Lemonade", description: "Acidic and refreshing", rating: 4, time: 30),
-            .init(image: "chicken-burger-2", name: "Chicken Burger", description: "Crunchy bread", rating: 5, time: 15)
-        ])], toSection: .recentlyAdded)
+        snapshot.appendItems([.init(yourRecipes: [], topChef: [], recentlyAdded: recentlyAddedProducts)], toSection: .recentlyAdded)
         homeDataSource.apply(snapshot, animatingDifferences: true)
     }
 }
@@ -264,5 +278,11 @@ extension HomeViewController: UITableViewDelegate {
             let vc = TopChefViewController()
             navigationController?.pushViewController(vc, animated: true)
         }
+    }
+}
+extension HomeViewController: RecentlyAddedTableViewCellDelegate {
+    func recentlyAddedTableViewCell(_ cell: RecentlyAddedTableViewCell, didSelectItem item: RecentlyAddedModel) {
+        let vc = TrendingRecipesDetailViewController(productName: item.name)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

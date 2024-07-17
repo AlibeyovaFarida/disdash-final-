@@ -8,6 +8,7 @@
 import UIKit
 
 class TrendingRecipeDetailAuthorTableViewCell: UITableViewCell {
+    
     private let mainStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
@@ -25,7 +26,7 @@ class TrendingRecipeDetailAuthorTableViewCell: UITableViewCell {
         let iv = UIImageView()
         iv.clipsToBounds = true
         iv.layer.cornerRadius = 31.5
-        iv.image = UIImage(named: "john_doe")
+//        iv.image = UIImage(named: "john_doe")
         return iv
     }()
     private let chefAccountDetailStackView: UIStackView = {
@@ -35,14 +36,14 @@ class TrendingRecipeDetailAuthorTableViewCell: UITableViewCell {
     }()
     private let chefUsernameLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "@John_Doe"
+//        lb.text = "@John_Doe"
         lb.font = UIFont(name: "Poppins-Regular", size: 12)
         lb.textColor = UIColor(named: "RedPinkMain")
         return lb
     }()
     private let chefNameLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "John Doe-Chef"
+//        lb.text = "John Doe-Chef"
         lb.textColor = UIColor(named: "TextColorBrown")
         lb.font = UIFont(name: "LeagueSpartan-Light", size: 14)
         return lb
@@ -127,5 +128,11 @@ class TrendingRecipeDetailAuthorTableViewCell: UITableViewCell {
             make.width.equalTo(4)
             make.height.equalTo(15)
         }
+    }
+    
+    func configure(_ item: RecipeAuthorModel){
+        chefImageView.kf.setImage(with: URL(string: item.image))
+        chefUsernameLabel.text = "@\(item.username)"
+        chefNameLabel.text = "\(item.name) \(item.surname)-Chef"
     }
 }

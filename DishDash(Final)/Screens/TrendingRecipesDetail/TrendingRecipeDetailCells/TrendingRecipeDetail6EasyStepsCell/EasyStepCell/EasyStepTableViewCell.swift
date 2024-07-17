@@ -42,6 +42,7 @@ class EasyStepTableViewCell: UITableViewCell {
         stepLabel.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(4)
             make.centerY.equalToSuperview()
+            make.top.bottom.equalToSuperview().inset(13)
         }
     }
     func configure(_ item: EasyStep) {

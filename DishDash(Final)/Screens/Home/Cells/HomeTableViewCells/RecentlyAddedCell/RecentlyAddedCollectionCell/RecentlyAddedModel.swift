@@ -10,5 +10,5 @@ struct RecentlyAddedModel: Equatable {
     let name: String
     let description: String
     let rating: Int
-    let time: Int
+    let time: String
 }

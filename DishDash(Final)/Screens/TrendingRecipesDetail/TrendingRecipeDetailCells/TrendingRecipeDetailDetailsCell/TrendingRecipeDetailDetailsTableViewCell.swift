@@ -49,7 +49,6 @@ class TrendingRecipeDetailDetailsTableViewCell: UITableViewCell {
         let lb = UILabel()
         lb.font = UIFont(name: "Poppins-Regular", size: 12)
         lb.textColor = UIColor(named: "TextColorBrown")
-        lb.text = "30 min"
         return lb
     }()
     private let detailsLabel: UILabel = {
@@ -57,7 +56,6 @@ class TrendingRecipeDetailDetailsTableViewCell: UITableViewCell {
         lb.font = UIFont(name: "Poppins-Regular", size: 12)
         lb.textColor = UIColor(named: "TextColorBrown")
         lb.numberOfLines = 0
-        lb.text = "This is a quick overview of the ingredients you’ll need for this Salami Pizza recipe. Specific measurements and full recipe instructions are in the printable recipe card below."
         return lb
     }()
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -98,5 +96,10 @@ class TrendingRecipeDetailDetailsTableViewCell: UITableViewCell {
         clockImageView.snp.makeConstraints { make in
             make.size.equalTo(10)
         }
+    }
+    
+    func configure(_ item: RecipeDetailCellModel){
+        timeLabel.text = item.cookingTime
+        detailsLabel.text = item.details
     }
 }

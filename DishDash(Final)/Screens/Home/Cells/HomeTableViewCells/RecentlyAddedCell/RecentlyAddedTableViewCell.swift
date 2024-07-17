@@ -7,7 +7,12 @@
 
 import UIKit
 
+protocol RecentlyAddedTableViewCellDelegate: AnyObject {
+    func recentlyAddedTableViewCell(_ cell: RecentlyAddedTableViewCell, didSelectItem item: RecentlyAddedModel)
+}
+
 class RecentlyAddedTableViewCell: UITableViewCell {
+    weak var delegate: RecentlyAddedTableViewCellDelegate?
     private var staticHeight = 0
     private var recentlyAddedList: [RecentlyAddedModel] = []
     
@@ -74,6 +79,14 @@ class RecentlyAddedTableViewCell: UITableViewCell {
         recentlyAddedCollectionView.snp.updateConstraints { make in
             make.height.equalTo(height)
         }
+    }
+}
+
+extension RecentlyAddedTableViewCell: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedItem = recentlyAddedList[indexPath.row]
+        delegate?.recentlyAddedTableViewCell(self, didSelectItem: selectedItem)
+//        print(selectedItem, "Hello")
     }
 }
 

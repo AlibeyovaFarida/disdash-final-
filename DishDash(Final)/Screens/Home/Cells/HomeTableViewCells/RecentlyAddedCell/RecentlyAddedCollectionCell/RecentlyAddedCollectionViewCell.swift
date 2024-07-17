@@ -139,6 +139,8 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
         
         recipeImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
+            let screenWidth = UIScreen.main.bounds.width
+            make.width.equalTo((screenWidth - 86) / 2)
             make.height.equalTo(153)
         }
         
@@ -155,7 +157,7 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(_ item: RecentlyAddedModel){
-        recipeImageView.image = UIImage(named: item.image)
+        recipeImageView.kf.setImage(with: URL(string: item.image))
         recipeTitleLabel.text = item.name
         recipeSubtitleLabel.text = item.description
         ratingLabel.text = "\(item.rating)"

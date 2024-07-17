@@ -1,19 +1,10 @@
-//
-//  CommunityViewController.swift
-//  DishDash(Final)
-//
-//  Created by Apple on 25.06.24.
-//
-
 import UIKit
+import Firebase
 
 class CommunityViewController: UIViewController {
-    private let communityCardList: [CommunityCardModel] = [
-        .init(authorImage: "josh-ryan", username: "@josh-ryan", time: "2 years ago", recipeImage: "community-chicken-curry", recipeName: "Chicken Curry ", rating: 5, description: "This recipe requires basic ingredients and minimal prep time, making it ideal for busy days...", cookingTime: "45min", comment: 2458),
-        .init(authorImage: "dakota.mullen", username: "@dakota.mullen", time: "11 Month ago", recipeImage: "community-macarons", recipeName: "Macarons", rating: 5, description: "This recipe will guide you through the art of making perfect macarons...", cookingTime: "38min", comment: 2273),
-        .init(authorImage: "cia_food", username: "@cia_food", time: "15 months ago", recipeImage: "community-chicken-burger", recipeName: "Chicken Burger", rating: 5, description: "This recipe requires basic ingredients and minimal prep time, making it ideal for busy days...", cookingTime: "45 min", comment: 1983)
-    ]
-    private let filterList: [FilterChoiseModel] = [
+
+    private var communityCardList: [CommunityCardModel] = []
+    private var filterList: [FilterChoiseModel] = [
         .init(name: "Top Recipes", isSelected: true),
         .init(name: "Newest", isSelected: false),
         .init(name: "Oldest", isSelected: false)
@@ -43,20 +34,33 @@ class CommunityViewController: UIViewController {
         return cv
     }()
     private let bottomShadowImageView = BottomShadowImageView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = UIColor(named: "WhiteBeige")
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        navigationItem.title = "Community"
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         filterCollectionView.dataSource = self
+        filterCollectionView.delegate = self
         communityCollectionView.dataSource = self
+        communityCollectionView.delegate = self
         setupUI()
+        fetchDataBasedOnFilter()
     }
-    private func setupUI(){
+    
+    private func setupUI() {
         view.addSubview(filterCollectionView)
         view.addSubview(communityCollectionView)
         view.addSubview(bottomShadowImageView)
+        
         filterCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(25)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.height.equalTo(36)
         }
@@ -70,8 +74,51 @@ class CommunityViewController: UIViewController {
             make.bottom.equalToSuperview()
         }
     }
+    
+    private func fetchDataBasedOnFilter() {
+        let db = Firestore.firestore()
+        communityCardList.removeAll()
+        communityCollectionView.reloadData()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        for filterOption in filterList {
+            if filterOption.isSelected {
+                let query: Query
+                if filterOption.name == "Newest" {
+                    query = db.collection("recipes").order(by: "date", descending: true)
+                } else if filterOption.name == "Oldest" {
+                    query = db.collection("recipes").order(by: "date", descending: false)
+                } else {
+                    query = db.collection("recipes").order(by: "rating", descending: true)
+                }
+                
+                query.getDocuments { querySnapshot, error in
+                    if let error = error {
+                        self.showAlert(title: "Server error", message: error.localizedDescription)
+                    } else {
+                        for document in querySnapshot!.documents {
+                            let chef = document.data()["chef"] as! [String : String]
+                            self.communityCardList.append(CommunityCardModel(
+                                authorImage: chef["image"]!,
+                                username: chef["username"]!,
+                                time: document.data()["date"] as? Date ?? Date(),
+                                recipeImage: document.data()["image"] as! String,
+                                recipeName: document.data()["name"] as! String,
+                                rating: document.data()["rating"] as! Int,
+                                description: document.data()["details"] as! String,
+                                cookingTime: document.data()["cookingTime"] as! String,
+                                comment: 0))
+                        }
+                        self.communityCollectionView.reloadData()
+                    }
+                }
+                break
+            }
+        }
+    }
 }
-extension CommunityViewController: UICollectionViewDataSource{
+
+extension CommunityViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == filterCollectionView {
             return filterList.count
@@ -81,8 +128,9 @@ extension CommunityViewController: UICollectionViewDataSource{
         }
         return 0
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if collectionView == filterCollectionView{
+        if collectionView == filterCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCollectionViewCell.identifier, for: indexPath) as! FilterCollectionViewCell
             cell.configure(filterList[indexPath.row])
             return cell
@@ -93,5 +141,22 @@ extension CommunityViewController: UICollectionViewDataSource{
             return cell
         }
         return UICollectionViewCell()
+    }
+}
+
+extension CommunityViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == filterCollectionView {
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+            for (index, _) in filterList.enumerated() {
+                filterList[index].isSelected = (index == indexPath.row)
+            }
+            filterCollectionView.reloadData()
+            fetchDataBasedOnFilter()
+        }
+        if collectionView == communityCollectionView {
+            let vc = TrendingRecipesDetailViewController(productName: communityCardList[indexPath.row].recipeName)
+            navigationController?.pushViewController(vc, animated: true)
+        }
     }
 }

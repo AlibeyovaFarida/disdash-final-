@@ -59,8 +59,8 @@ class IngredientItemTableViewCell: UITableViewCell {
         }
     }
     
-    func configure(_ item: IngredientItemModel){
-        quantityLabel.text = item.quantity
-        ingredientLabel.text = item.ingredient
+    func configure(_ item: String){
+//        quantityLabel.text = item.quantity
+        ingredientLabel.text = item
     }
 }
