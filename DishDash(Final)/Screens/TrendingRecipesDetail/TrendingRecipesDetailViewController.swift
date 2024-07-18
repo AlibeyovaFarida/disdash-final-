@@ -118,7 +118,6 @@ class TrendingRecipesDetailViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         setupCustomBackButton()
-        navigationItem.title = productName
         super.viewDidLoad()
         
         let db = Firestore.firestore()
@@ -162,6 +161,13 @@ class TrendingRecipesDetailViewController: UIViewController {
                     self.applySnapshot()
                 }
             }
+        }
+        navigationItem.title = productName
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
         }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         trendingRecipeDetailTableView.separatorStyle = .none

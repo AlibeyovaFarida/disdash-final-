@@ -27,20 +27,11 @@ class NotificationsViewController: UIViewController {
         setupCustomBackButton()
         notificationsTableView.backgroundColor = .clear
         view.backgroundColor = UIColor(named: "WhiteBeige")
-//        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        notificationsTableView.sectionHeaderTopPadding = 0
         notificationsTableView.dataSource = self
         notificationsTableView.delegate = self
         notificationsTableView.separatorStyle = .none
         setupUI()
-    }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
     }
     private func setupCustomBackButton() {
         guard let backButtonImage = UIImage(named: "back-button") else {

@@ -123,7 +123,6 @@ class HomeViewController: UIViewController{
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         let db = Firestore.firestore()
         db.collection("recipes").order(by: "date", descending: true).limit(to: 6).getDocuments { querySnapshot, error in
             if let error = error {
@@ -144,7 +143,7 @@ class HomeViewController: UIViewController{
         }
         
         view.backgroundColor = UIColor(named: "WhiteBeige")
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
+//        self.navigationController?.setNavigationBarHidden(true, animated: true)
         categoryCollectionView.backgroundColor = .clear
         categoryCollectionView.dataSource = self
         categoryCollectionView.delegate = self
@@ -156,13 +155,13 @@ class HomeViewController: UIViewController{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Hide the navigation bar
-        navigationController?.setNavigationBarHidden(true, animated: false)
+//        navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Hide the navigation bar
-        navigationController?.setNavigationBarHidden(true, animated: false)
+//        navigationController?.setNavigationBarHidden(true, animated: false)
     }
     private func setupUI(){
         view.addSubview(headerContainerView)
@@ -186,7 +185,8 @@ class HomeViewController: UIViewController{
             make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
         stackView.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview().inset(19)
+            make.top.equalToSuperview()
+            make.bottom.equalToSuperview().inset(19)
             make.leading.trailing.equalToSuperview().inset(28)
         }
         categoryCollectionView.snp.makeConstraints { make in
@@ -223,6 +223,7 @@ class HomeViewController: UIViewController{
             if indexPath.section == 3 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: RecentlyAddedTableViewCell.identifier) as! RecentlyAddedTableViewCell
                 cell.configure(itemIdentifier.recentlyAdded)
+                cell.delegate = self
                 return cell
             }
             return UITableViewCell()

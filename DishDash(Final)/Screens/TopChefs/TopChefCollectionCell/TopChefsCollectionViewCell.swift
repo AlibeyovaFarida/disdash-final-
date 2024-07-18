@@ -169,7 +169,7 @@ class TopChefsCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(_ item: TopChefsModel){
-        topChefImageView.image = UIImage(named: item.image)
+        topChefImageView.kf.setImage(with: URL(string: item.image))
         topChefInfoNameLabel.text = item.name
         topChefInfoUsernameLabel.text = item.username
         ratingLabel.text = "\(item.ratingCount)"

@@ -6,18 +6,13 @@
 //
 
 import UIKit
+import FirebaseFirestore
+
 
 class RecipesViewController: UIViewController {
-    private let recipeList: [RecipeModel] = [
-//        .init(image: "beans-burger", name: "Beans Burger", description: "Veggie-packed bean burger patty", rating: 4, cookingTime: "30min"),
-//        .init(image: "broccoli-lasagna", name: "Broccoli Lasagna", description: "Cheesy broccoli-filled lasagna layers", rating: 4, cookingTime: "30min"),
-//        .init(image: "egg-plant-gratin", name: "Egg Plant Gratin", description: "Oven-baked eggplant with savory gratin", rating: 4, cookingTime: "30min"),
-//        .init(image: "quinoa-salad", name: "Quinoa Salad", description: "Nutrient-rich quinoa tossed in salad", rating: 4, cookingTime: "30min"),
-//        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
-//        .init(image: "falafel-salad", name: "Falafel Salad", description: "Crisp falafel atop fresh salad greens", rating: 4, cookingTime: "30min"),
-//        .init(image: "veggie-pizza", name: "Veggie Pizza", description: "Colorful veggie-topped pizza pie", rating: 4, cookingTime: "30min"),
-//        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
-    ]
+    private var categoryName: String = ""
+    private var chefUsername: String = ""
+    private var recipeList: [RecipeModel] = []
     private let recipesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -35,12 +30,72 @@ class RecipesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("recipes").whereField("taste", isEqualTo: categoryName).whereField("chef.username", isEqualTo: chefUsername).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents {
+                    self.recipeList.append(RecipeModel(
+                        name: document.data()["name"] as! String,
+                        image: document.data()["image"] as! String,
+                        description: document.data()["description"] as! String,
+                        rating: document.data()["rating"] as! Int,
+                        cookingTime: document.data()["cookingTime"] as! String))
+                }
+                DispatchQueue.main.async {
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        }
+        setupCustomBackButton()
+        navigationItem.title = categoryName
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         recipesCollectionView.backgroundColor = .clear
         recipesCollectionView.dataSource = self
+        recipesCollectionView.delegate = self
         setupUI()
     }
     
+    init(categoryName: String, chefUsername: String) {
+        super.init(nibName: nil, bundle: nil)
+        self.categoryName = categoryName
+        self.chefUsername = chefUsername
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupCustomBackButton() {
+        guard let backButtonImage = UIImage(named: "back-button") else {
+                print("Error: Back button image not found.")
+                return
+            }
+            
+        let backButton = UIButton(type: .custom)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+            
+        let backBarButtonItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarButtonItem
+            
+        backButton.snp.makeConstraints { make in
+            make.width.equalTo(22.4)
+            make.height.equalTo(14)
+        }
+    }
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
     private func setupUI(){
         view.addSubview(recipesCollectionView)
         view.addSubview(bottomShadowImageView)
@@ -56,7 +111,12 @@ class RecipesViewController: UIViewController {
         }
     }
 }
-
+extension RecipesViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = TrendingRecipesDetailViewController(productName: recipeList[indexPath.row].name)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+}
 extension RecipesViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return recipeList.count

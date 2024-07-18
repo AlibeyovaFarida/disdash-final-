@@ -6,12 +6,13 @@
 //
 
 import UIKit
+import Firebase
 
 class ChefProfileViewController: UIViewController {
+    private var chefUsername: String = ""
     private let chefCollectionRecipesList: [ChefCollectionRecipesModel] = [
-        .init(image: "vegan-recipes", name: "Vegan Recipes"),
-        .init(image: "asian-heritage", name: "Asian Heritage"),
-        .init(image: "guilty-pleasures", name: "Guilty Pleasures")
+        .init(image: "asian-heritage", name: "Salty"),
+        .init(image: "guilty-pleasures", name: "Sweet")
     ]
     private let chefProfileStackView: UIStackView = {
         let sv = UIStackView()
@@ -23,7 +24,6 @@ class ChefProfileViewController: UIViewController {
     private let chefProfileImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
-        iv.image = UIImage(named: "neil-tran")
         iv.layer.cornerRadius = 48.5
         return iv
     }()
@@ -38,7 +38,6 @@ class ChefProfileViewController: UIViewController {
         let lb = UILabel()
         lb.font = UIFont(name: "Poppins-Medium", size: 15)
         lb.textColor = UIColor(named: "RedPinkMain")
-        lb.text = "Neil Tran-Chef"
         return lb
     }()
     private let chefDescriptionLabel: UILabel = {
@@ -181,10 +180,62 @@ class ChefProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(chefUsername, "hello")
+        let db = Firestore.firestore()
+        db.collection("chefs").whereField("username", isEqualTo: chefUsername).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    self.chefProfileImageView.kf.setImage(with: URL(string: document.data()["image"] as! String))
+                    self.chefNameLabel.text = "\(document.data()["name"] as! String) \(document.data()["surname"] as! String)"
+                    self.navigationItem.title = "@\( document.data()["username"] as! String)"
+                }
+            }
+        }
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
+        setupCustomBackButton()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         chefCollectionsRecipesCollectionView.dataSource = self
+        chefCollectionsRecipesCollectionView.delegate = self
         setupUI()
     }
+    private func setupCustomBackButton() {
+        guard let backButtonImage = UIImage(named: "back-button") else {
+                print("Error: Back button image not found.")
+                return
+            }
+            
+        let backButton = UIButton(type: .custom)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+            
+        let backBarButtonItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarButtonItem
+            
+        backButton.snp.makeConstraints { make in
+            make.width.equalTo(22.4)
+            make.height.equalTo(14)
+        }
+    }
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
+    init(chefUsername: String) {
+        super.init(nibName: nil, bundle: nil)
+        self.chefUsername = chefUsername
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     private func setupUI(){
         view.addSubview(chefProfileStackView)
@@ -225,7 +276,7 @@ class ChefProfileViewController: UIViewController {
         ].forEach(recipeHeaderStackView.addArrangedSubview)
         view.addSubview(chefCollectionsRecipesCollectionView)
         chefProfileStackView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(31)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
         }
         chefProfileImageView.snp.makeConstraints { make in
@@ -265,6 +316,12 @@ class ChefProfileViewController: UIViewController {
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalToSuperview()
         }
+    }
+}
+extension ChefProfileViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let vc = RecipesViewController(categoryName: chefCollectionRecipesList[indexPath.row].name, chefUsername: chefUsername)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 extension ChefProfileViewController: UICollectionViewDataSource{

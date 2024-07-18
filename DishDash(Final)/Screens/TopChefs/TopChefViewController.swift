@@ -6,20 +6,11 @@
 //
 
 import UIKit
+import Firebase
 
 class TopChefViewController: UIViewController {
-    private let mostViewedChefs: [TopChefsModel] = [
-        .init(image: "neil-tran-top", name: "Neil Tran-Chef", username: "@neil_tran", ratingCount: 6687),
-        .init(image: "jessica-davis", name: "Jessica Davis-Chef", username: "@jessi_davis", ratingCount: 5687),
-        .init(image: "neil-tran-top", name: "Neil Tran-Chef", username: "@neil_tran", ratingCount: 6687),
-        .init(image: "jessica-davis", name: "Jessica Davis-Chef", username: "@jessi_davis", ratingCount: 5687)
-    ]
-    private let chefsList: [TopChefsModel] = [
-        .init(image: "daniel-martinez", name: "Daniel Martinez", username: "@dan-chef", ratingCount: 6687),
-        .init(image: "aria-chang", name: "Aria Chang", username: "@ariachang-chef", ratingCount: 5687),
-        .init(image: "lily-chen", name: "Lily Chen-Chef", username: "@lily.chef", ratingCount: 6687),
-        .init(image: "edward-jones", name: "Edward Jones", username: "@edjones-chef", ratingCount: 5687)
-    ]
+    private var mostViewedChefs: [TopChefsModel] = []
+    private var chefsList: [TopChefsModel] = []
     private let mostViewedChefsView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(named: "RedPinkMain")
@@ -60,10 +51,53 @@ class TopChefViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let db = Firestore.firestore()
+        db.collection("chefs").order(by: "rating", descending: true).limit(to: 2).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents {
+                    self.mostViewedChefs.append(TopChefsModel(
+                        image: document.data()["image"] as! String,
+                        name: "\(document.data()["name"] as! String) \(document.data()["surname"] as! String)",
+                        username: document.data()["username"] as! String,
+                        ratingCount: document.data()["rating"] as! Int))
+                }
+                DispatchQueue.main.async {
+                    self.mostViewedChefsCollectionView.reloadData()
+                }
+            }
+        }
+        db.collection("chefs").order(by: "rating", descending: true).limit(toLast: 23).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents {
+                    self.chefsList.append(TopChefsModel(
+                        image: document.data()["image"] as! String,
+                        name: "\(document.data()["name"] as! String) \(document.data()["surname"] as! String)",
+                        username: document.data()["username"] as! String,
+                        ratingCount: document.data()["rating"] as! Int))
+                }
+                DispatchQueue.main.async {
+                    self.chefsCollectionView.reloadData()
+                }
+            }
+        }
         setupCustomBackButton()
+        navigationItem.title = "Top Chef"
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         mostViewedChefsCollectionView.dataSource = self
+        mostViewedChefsCollectionView.delegate = self
         chefsCollectionView.dataSource = self
+        chefsCollectionView.delegate = self
         mostViewedChefsCollectionView.backgroundColor = .clear
         chefsCollectionView.backgroundColor = .clear
         setupUI()
@@ -121,7 +155,17 @@ class TopChefViewController: UIViewController {
         }
     }
 }
-
+extension TopChefViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == mostViewedChefsCollectionView{
+            let vc = ChefProfileViewController(chefUsername: mostViewedChefs[indexPath.row].username)
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            let vc = ChefProfileViewController(chefUsername: chefsList[indexPath.row].username)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+}
 extension TopChefViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == mostViewedChefsCollectionView{
