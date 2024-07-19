@@ -6,7 +6,8 @@
 //
 
 import UIKit
-
+import FirebaseAuth
+import Firebase
 protocol RecentlyAddedTableViewCellDelegate: AnyObject {
     func recentlyAddedTableViewCell(_ cell: RecentlyAddedTableViewCell, didSelectItem item: RecentlyAddedModel)
 }
@@ -14,6 +15,8 @@ protocol RecentlyAddedTableViewCellDelegate: AnyObject {
 class RecentlyAddedTableViewCell: UITableViewCell {
     weak var delegate: RecentlyAddedTableViewCellDelegate?
     private var staticHeight = 0
+    private var favoriteRecipes: Set<String> = []
+    private let userId = Auth.auth().currentUser?.uid
     private var recentlyAddedList: [RecentlyAddedModel] = []
     
     private let titleLabel: UILabel = {
@@ -66,7 +69,36 @@ class RecentlyAddedTableViewCell: UITableViewCell {
             make.height.equalTo(226)
         }
     }
-    
+    private func toggleFavorite(for recipe: RecentlyAddedModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.name)
+        
+        if favoriteRecipes.contains(recipe.name) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    print("Server error")
+                } else {
+                    self.favoriteRecipes.remove(recipe.name)
+                    self.recentlyAddedCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.name,
+                "image": recipe.image,
+                "description": recipe.description,
+                "rating": recipe.rating,
+                "cookingTime": recipe.time
+            ]) { error in
+                if let error = error {
+                    print("Server error")
+                } else {
+                    self.favoriteRecipes.insert(recipe.name)
+                    self.recentlyAddedCollectionView.reloadData()
+                }
+            }
+        }
+    }
     func configure(_ item: [RecentlyAddedModel]){
         recentlyAddedList = item
         recentlyAddedCollectionView.reloadData()
@@ -97,7 +129,12 @@ extension RecentlyAddedTableViewCell: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecentlyAddedCollectionViewCell.identifier, for: indexPath) as! RecentlyAddedCollectionViewCell
-        cell.configure(recentlyAddedList[indexPath.row])
+        var recipe = recentlyAddedList[indexPath.row]
+        let isFavorite = favoriteRecipes.contains(recipe.name)
+        cell.configure(recipe, isFavorite: isFavorite)
+        cell.favoriteButtonTapped = {
+            self.toggleFavorite(for: recipe)
+        }
         return cell
     }
 }

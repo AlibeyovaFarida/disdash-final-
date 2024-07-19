@@ -25,6 +25,14 @@ class TrendingRecipeTableViewCell: UITableViewCell {
         let view = UIView()
         return view
     }()
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        return btn
+    }()
     private let recipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named: "trend-recipe")
@@ -132,7 +140,8 @@ class TrendingRecipeTableViewCell: UITableViewCell {
         ].forEach(stackView.addArrangedSubview)
         [
             descriptionView,
-            recipeImageView
+            recipeImageView,
+            favButton
         ].forEach(recipeView.addSubview)
         descriptionView.addSubview(descriptionStackView)
         [
@@ -162,6 +171,11 @@ class TrendingRecipeTableViewCell: UITableViewCell {
         }
         recipeImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
+        }
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalToSuperview().inset(8.52)
+            make.size.equalTo(28)
         }
         descriptionView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(5)

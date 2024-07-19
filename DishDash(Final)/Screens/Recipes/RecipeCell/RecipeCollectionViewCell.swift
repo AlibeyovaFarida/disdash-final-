@@ -7,12 +7,28 @@
 
 import UIKit
 import Kingfisher
+
+
+
 class RecipeCollectionViewCell: UICollectionViewCell {
+    var favoriteButtonTapped: (() -> Void)?
     private let recipeView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
         return view
     }()
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(favButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    @objc private func favButtonTapped() {
+        favoriteButtonTapped?()
+    }
     private let recipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
@@ -96,7 +112,7 @@ class RecipeCollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -105,6 +121,7 @@ class RecipeCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(recipeView)
         recipeView.addSubview(recipeDescriptionView)
         recipeView.addSubview(recipeImageView)
+        recipeView.addSubview(favButton)
         recipeDescriptionView.addSubview(recipeDescriptionStackView)
         [
             recipeNameDescStackView,
@@ -130,6 +147,11 @@ class RecipeCollectionViewCell: UICollectionViewCell {
         recipeView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalToSuperview().inset(8.52)
+            make.size.equalTo(28)
+        }
         recipeImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
             let screenWidth = UIScreen.main.bounds.width
@@ -153,11 +175,16 @@ class RecipeCollectionViewCell: UICollectionViewCell {
             make.size.equalTo(10)
         }
     }
-    func configure(_ item: RecipeModel){
+    func configure(_ item: RecipeModel, isFavorite: Bool){
         recipeImageView.kf.setImage(with: URL(string: item.image))
         recipeNameLabel.text = item.name
         recipeDescriptionLabel.text = item.description
         ratingLabel.text = "\(item.rating)"
         cookingTimeLabel.text = item.cookingTime
+        updateFavButton(isFavorite: isFavorite)
+    }
+    private func updateFavButton(isFavorite: Bool) {
+        favButton.backgroundColor = isFavorite ? UIColor(named: "PinkBase") : UIColor(named: "RedPinkMain")
+        favButton.imageView?.tintColor = isFavorite ? UIColor(named: "PinkSubColor") : UIColor(named: "WhiteBeige")
     }
 }

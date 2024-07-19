@@ -59,7 +59,7 @@ extension FavoriteCategoryProductsViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-        cell.configure(recipeList[indexPath.row])
+        cell.configure(recipeList[indexPath.row], isFavorite: false)
         return cell
     }
 }

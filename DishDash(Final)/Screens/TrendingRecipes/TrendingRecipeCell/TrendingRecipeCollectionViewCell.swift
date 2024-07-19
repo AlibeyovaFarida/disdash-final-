@@ -8,10 +8,24 @@
 import UIKit
 
 class TrendingRecipeCollectionViewCell: UICollectionViewCell {
+    var favoriteButtonTapped: (() -> Void)?
     private let trendingRecipeView: UIView = {
         let view = UIView()
         return view
     }()
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(favButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    @objc
+    private func favButtonTapped(){
+        favoriteButtonTapped?()
+    }
     private let trendingRecipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
@@ -120,6 +134,7 @@ class TrendingRecipeCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(trendingRecipeView)
         trendingRecipeView.addSubview(trendingRecipeDescriptionView)
         trendingRecipeView.addSubview(trendingRecipeImageView)
+        trendingRecipeView.addSubview(favButton)
         trendingRecipeDescriptionView.addSubview(trendingRecipeDescriptionStackView)
         [
             trendingRecipeTitleLabel,
@@ -148,6 +163,11 @@ class TrendingRecipeCollectionViewCell: UICollectionViewCell {
         trendingRecipeView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalTo(trendingRecipeImageView.snp.trailing).inset(8)
+            make.size.equalTo(28)
+        }
         trendingRecipeImageView.snp.makeConstraints { make in
             make.top.leading.bottom.equalToSuperview()
             make.size.equalTo(150)
@@ -174,7 +194,7 @@ class TrendingRecipeCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    func configure(_ item: TrendingRecipeItemModel){
+    func configure(_ item: TrendingRecipeItemModel, isFavorite: Bool){
         trendingRecipeImageView.kf.setImage(with: URL(string: item.image))
         trendingRecipeTitleLabel.text = item.name
         trendingRecipeDescriptionLabel.text = item.description
@@ -182,5 +202,10 @@ class TrendingRecipeCollectionViewCell: UICollectionViewCell {
         trendingRecipeCookingTimeLabel.text = item.time
         trendingRecipeLevelLabel.text = "\(item.level)"
         trendingRecipeRatingLabel.text = "\(item.rating)"
+        updateFavButton(isFavorite: isFavorite)
+    }
+    private func updateFavButton(isFavorite: Bool) {
+        favButton.backgroundColor = isFavorite ? UIColor(named: "PinkBase") : UIColor(named: "RedPinkMain")
+        favButton.imageView?.tintColor = isFavorite ? UIColor(named: "PinkSubColor") : UIColor(named: "WhiteBeige")
     }
 }

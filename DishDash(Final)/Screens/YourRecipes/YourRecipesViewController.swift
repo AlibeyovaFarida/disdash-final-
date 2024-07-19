@@ -143,7 +143,7 @@ extension YourRecipesViewController: UICollectionViewDataSource {
         }
         if collectionView == recipesCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-            cell.configure(recipesList[indexPath.row])
+            cell.configure(recipesList[indexPath.row], isFavorite: false)
             return cell
         }
         return UICollectionViewCell()

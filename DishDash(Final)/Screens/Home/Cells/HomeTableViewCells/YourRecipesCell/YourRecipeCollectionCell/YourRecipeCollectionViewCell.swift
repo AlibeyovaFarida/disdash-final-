@@ -13,6 +13,14 @@ class YourRecipeCollectionViewCell: UICollectionViewCell {
         view.backgroundColor = .clear
         return view
     }()
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        return btn
+    }()
     private let recipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.layer.cornerRadius = 13
@@ -101,6 +109,7 @@ class YourRecipeCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(recipeBackgroundView)
         [
             recipeImageView,
+            favButton,
             descriptionView
         ].forEach(recipeBackgroundView.addSubview)
         descriptionView.addSubview(descriptionStackView)
@@ -129,6 +138,11 @@ class YourRecipeCollectionViewCell: UICollectionViewCell {
             let screenWidth = UIScreen.main.bounds.width
             make.width.equalTo((screenWidth - 84) / 2)
             make.height.equalTo(162)
+        }
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalToSuperview().inset(8.52)
+            make.size.equalTo(28)
         }
         descriptionView.snp.makeConstraints { make in
             make.top.equalTo(recipeImageView.snp.bottom).offset(-20)

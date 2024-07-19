@@ -7,16 +7,18 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
 
 class TrendingRecipesViewController: UIViewController {
     private var trendingRecipesList: [TrendingRecipeItemModel] = []
+    private var favoriteRecipes: Set<String> = []
+    private let userId = Auth.auth().currentUser?.uid
     private let mostViewedTodayView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 20
         view.backgroundColor = UIColor(named: "RedPinkMain")
         return view
     }()
-    
     private let mostViewedTodayStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
@@ -139,33 +141,11 @@ class TrendingRecipesViewController: UIViewController {
     }()
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
+        fetchRecipes()
+        fetchFavorites()
         setupCustomBackButton()
         super.viewDidLoad()
         
-        let db = Firestore.firestore()
-        db.collection("recipes").whereField("rating", isEqualTo: 5).getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                for document in querySnapshot!.documents{
-                    if let chef = document.data()["chef"] as? [String:String]{
-                        self.trendingRecipesList.append(TrendingRecipeItemModel(
-                            image: document.data()["image"] as! String,
-                            name: document.data()["name"] as! String,
-                            description: document.data()["description"] as! String,
-                            chefName: chef["name"]!,
-                            time: document.data()["cookingTime"] as! String,
-                            level: document.data()["level"] as! String,
-                            rating: document.data()["rating"] as! Int))
-                    } else {
-                        print("Server error")
-                    }
-                }
-                DispatchQueue.main.async {
-                    self.trendingRecipesCollectionView.reloadData()
-                }
-            }
-        }
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didSelectMostViewedRecipe))
         mostViewedTodayRecipeView.addGestureRecognizer(tapGesture)
         view.backgroundColor = UIColor(named: "WhiteBeige")
@@ -200,6 +180,78 @@ class TrendingRecipesViewController: UIViewController {
     @objc
     private func didTapBackButton() {
         navigationController?.popViewController(animated: true)
+    }
+    private func fetchRecipes(){
+        let db = Firestore.firestore()
+        db.collection("recipes").whereField("rating", isEqualTo: 5).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    if let chef = document.data()["chef"] as? [String:String]{
+                        self.trendingRecipesList.append(TrendingRecipeItemModel(
+                            image: document.data()["image"] as! String,
+                            name: document.data()["name"] as! String,
+                            description: document.data()["description"] as! String,
+                            chefName: chef["name"]!,
+                            time: document.data()["cookingTime"] as! String,
+                            level: document.data()["level"] as! String,
+                            rating: document.data()["rating"] as! Int))
+                    } else {
+                        print("Server error")
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.trendingRecipesCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    
+    private func fetchFavorites(){
+        let db = Firestore.firestore()
+        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents {
+                    self.favoriteRecipes.insert(document.documentID)
+                }
+                DispatchQueue.main.async {
+                    self.trendingRecipesCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    private func toggleFavorite(for recipe: TrendingRecipeItemModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.name)
+        
+        if favoriteRecipes.contains(recipe.name) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.remove(recipe.name)
+                    self.trendingRecipesCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.name,
+                "image": recipe.image,
+                "description": recipe.description,
+                "rating": recipe.rating,
+                "cookingTime": recipe.time
+            ]) { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.insert(recipe.name)
+                    self.trendingRecipesCollectionView.reloadData()
+                }
+            }
+        }
     }
     private func setupUI(){
         view.addSubview(mostViewedTodayView)
@@ -283,7 +335,12 @@ extension TrendingRecipesViewController: UICollectionViewDataSource {
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrendingRecipeCollectionViewCell.identifier, for: indexPath) as! TrendingRecipeCollectionViewCell
-        cell.configure(trendingRecipesList[indexPath.row])
+        var recipe = trendingRecipesList[indexPath.row]
+        let isFavorite = favoriteRecipes.contains(recipe.name)
+        cell.configure(recipe, isFavorite: isFavorite)
+        cell.favoriteButtonTapped = {
+            self.toggleFavorite(for: recipe)
+        }
         return cell
     }
 }

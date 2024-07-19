@@ -7,8 +7,10 @@
 
 import UIKit
 import FirebaseAuth
+import Firebase
+
 class ProfileViewController: UIViewController {
-    private let recipeList: [RecipeModel] = [
+    private var recipeList: [RecipeModel] = [
         .init(name: "Crispy Shrimp", image: "crispy-shrimp", description: "A feast for the senses", rating: 4, cookingTime: "20min"),
         .init(name: "Chicken Wings", image: "chicken-wings", description: "Delicious and juicy wings", rating: 5, cookingTime: "30min"),
         .init(name: "Colors Macarons", image: "colors-macarons", description: "Sweet bites full of elegance", rating: 4, cookingTime: "40min"),
@@ -235,6 +237,7 @@ class ProfileViewController: UIViewController {
         lb.textColor = UIColor(named: "TextColorBrown")
         lb.text = "Recipe"
         lb.textAlignment = .center
+        lb.isUserInteractionEnabled = true
         return lb
     }()
     
@@ -257,6 +260,7 @@ class ProfileViewController: UIViewController {
         lb.textColor = UIColor(named: "TextColorBrown")
         lb.text = "Favorites"
         lb.textAlignment = .center
+        lb.isUserInteractionEnabled = true
         return lb
     }()
     
@@ -293,13 +297,33 @@ class ProfileViewController: UIViewController {
     
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
+        super.viewDidLoad()
+        let tapGestureRecipeTab = UITapGestureRecognizer(target: self, action: #selector(didTapRecipeTab))
+        recipeTabLabel.addGestureRecognizer(tapGestureRecipeTab)
+        let tapGestureFavoriteTab = UITapGestureRecognizer(target: self, action: #selector(didTapFavoriteTab))
+        favoritesTabLabel.addGestureRecognizer(tapGestureFavoriteTab)
         view.backgroundColor = UIColor(named: "WhiteBeige")
         recipeCollectionView.dataSource = self
-        recipeCollectionView.isHidden = true
+        favoritesCollectionView.isHidden = true
         favoritesCollectionView.dataSource = self
-        super.viewDidLoad()
         setupUI()
     }
+    @objc
+    private func didTapRecipeTab(){
+        recipeCollectionView.isHidden = false
+        favoritesCollectionView.isHidden = true
+        recipeTabLineImageView.tintColor = UIColor(named: "RedPinkMain")
+        favoritesTabLineImageView.tintColor = UIColor(named: "WhiteBeige")
+    }
+    @objc
+    private func didTapFavoriteTab(){
+        recipeCollectionView.isHidden = true
+        favoritesCollectionView.isHidden = false
+        favoritesTabLineImageView.tintColor = UIColor(named: "RedPinkMain")
+        recipeTabLineImageView.tintColor = UIColor(named: "WhiteBeige")
+    }
+    
+    
     private func setupUI(){
         view.addSubview(profileCardStackView)
         [
@@ -461,7 +485,7 @@ extension ProfileViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == recipeCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-            cell.configure(recipeList[indexPath.row])
+            cell.configure(recipeList[indexPath.row], isFavorite: false)
             return cell
         }
         if collectionView == favoritesCollectionView {

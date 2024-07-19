@@ -8,12 +8,24 @@
 import UIKit
 
 class RecentlyAddedCollectionViewCell: UICollectionViewCell {
-    
+    var favoriteButtonTapped: (() -> Void)?
     private let recipeView: UIView = {
         let view = UIView()
         return view
     }()
-    
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(favButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    @objc
+    private func favButtonTapped(){
+        favoriteButtonTapped?()
+    }
     private let recipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
@@ -67,7 +79,6 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
         let sv = UIStackView()
         sv.axis = .horizontal
         sv.spacing = 5
-//        sv.distribution = .fillProportionally
         sv.alignment = .center
         return sv
     }()
@@ -114,6 +125,7 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
     private func setupUI(){
         contentView.addSubview(recipeDescriptionView)
         contentView.addSubview(recipeImageView)
+        contentView.addSubview(favButton)
         recipeDescriptionView.addSubview(recipeDescriptionStackView)
         
         [
@@ -143,7 +155,11 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
             make.width.equalTo((screenWidth - 86) / 2)
             make.height.equalTo(153)
         }
-        
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalToSuperview().inset(8.52)
+            make.size.equalTo(28)
+        }
         recipeDescriptionView.snp.makeConstraints { make in
             make.top.equalTo(recipeImageView.snp.bottom).offset(-24)
             make.leading.trailing.equalToSuperview().inset(5)
@@ -156,11 +172,16 @@ class RecentlyAddedCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    func configure(_ item: RecentlyAddedModel){
+    func configure(_ item: RecentlyAddedModel, isFavorite: Bool){
         recipeImageView.kf.setImage(with: URL(string: item.image))
         recipeTitleLabel.text = item.name
         recipeSubtitleLabel.text = item.description
         ratingLabel.text = "\(item.rating)"
         cookingTimeLabel.text = "\(item.time)"
+        updateFavButton(isFavorite: isFavorite)
+    }
+    private func updateFavButton(isFavorite: Bool) {
+        favButton.backgroundColor = isFavorite ? UIColor(named: "PinkBase") : UIColor(named: "RedPinkMain")
+        favButton.imageView?.tintColor = isFavorite ? UIColor(named: "PinkSubColor") : UIColor(named: "WhiteBeige")
     }
 }
