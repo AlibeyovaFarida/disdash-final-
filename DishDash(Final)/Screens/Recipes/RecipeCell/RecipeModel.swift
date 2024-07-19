@@ -11,4 +11,5 @@ struct RecipeModel {
     let description: String
     let rating: Int
     let cookingTime: String
+    let taste: String
 }

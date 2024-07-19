@@ -1,9 +1,12 @@
 import UIKit
 import Firebase
+import FirebaseAuth
 
 class CommunityViewController: UIViewController {
 
     private var communityCardList: [CommunityCardModel] = []
+    private var favoriteRecipes: Set<String> = []
+    private let userId = Auth.auth().currentUser?.uid
     private var filterList: [FilterChoiseModel] = [
         .init(name: "Top Recipes", isSelected: true),
         .init(name: "Newest", isSelected: false),
@@ -37,7 +40,8 @@ class CommunityViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        fetchDataBasedOnFilter()
+        fetchFavorites()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         navigationItem.title = "Community"
         if let navigationBar = self.navigationController?.navigationBar {
@@ -52,6 +56,7 @@ class CommunityViewController: UIViewController {
         communityCollectionView.delegate = self
         setupUI()
         fetchDataBasedOnFilter()
+        fetchFavorites()
     }
     
     private func setupUI() {
@@ -107,12 +112,60 @@ class CommunityViewController: UIViewController {
                                 rating: document.data()["rating"] as! Int,
                                 description: document.data()["details"] as! String,
                                 cookingTime: document.data()["cookingTime"] as! String,
-                                comment: 0))
+                                comment: 0,
+                                taste: document.data()["taste"] as! String
+                            ))
                         }
                         self.communityCollectionView.reloadData()
                     }
                 }
                 break
+            }
+        }
+    }
+    private func fetchFavorites() {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents {
+                    self.favoriteRecipes.insert(document.documentID)
+                }
+                DispatchQueue.main.async {
+                    self.communityCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    private func toggleFavorite(for recipe: CommunityCardModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.recipeName)
+        
+        if favoriteRecipes.contains(recipe.recipeName) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.remove(recipe.recipeName)
+                    self.communityCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.recipeName,
+                "image": recipe.recipeImage,
+                "description": recipe.description,
+                "rating": recipe.rating,
+                "cookingTime": recipe.cookingTime,
+                "taste": recipe.taste
+            ]) { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.insert(recipe.recipeName)
+                    self.communityCollectionView.reloadData()
+                }
             }
         }
     }
@@ -137,7 +190,12 @@ extension CommunityViewController: UICollectionViewDataSource {
         }
         if collectionView == communityCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CommunityCardCollectionViewCell.identifier, for: indexPath) as! CommunityCardCollectionViewCell
-            cell.configure(communityCardList[indexPath.row])
+            var recipe = communityCardList[indexPath.row]
+            let isFavorite = favoriteRecipes.contains(recipe.recipeName)
+            cell.configure(recipe, isFavorite)
+            cell.favoriteButtonTapped = {
+                self.toggleFavorite(for: recipe)
+            }
             return cell
         }
         return UICollectionViewCell()

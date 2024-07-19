@@ -6,22 +6,14 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
 
 class YourRecipesViewController: UIViewController {
-    private let mostViewedTodayList: [YourRecipeModel] = [
-        .init(image: "chicken-burger", title: "Chicken Burger", rating: 5, time: 15),
-        .init(image: "tiramisu", title: "Tiramisu", rating: 5, time: 15)
-    ]
-    private let recipesList: [RecipeModel] = [
-//        .init(image: "bechamel-pasta", name: "Béchamel  Pasta", description: "A creamy and indulgent", rating: 4, cookingTime: "30min"),
-//        .init(image: "grilled-skewers", name: "Grilled Skewers", description: "Succulent morsels", rating: 4, cookingTime: "30min"),
-//        .init(image: "nut-brownie", name: "Nut brownie", description: "Is a rich and indulgent dessert...", rating: 4, cookingTime: "30min"),
-//        .init(image: "oatmeal-pancakes", name: "Oatmeal pancakes", description: "These nutritious delights offer a satisfyingly...", rating: 4, cookingTime: "30min"),
-//        .init(image: "mushroom-risotto", name: "Mushroom Risotto", description: "Creamy mushroom-infused rice dish", rating: 4, cookingTime: "30min"),
-//        .init(image: "waffles", name: "Waffles", description: "They're fluffy on the inside, perfect...", rating: 4, cookingTime: "30min"),
-//        .init(image: "iced-coffee", name: "Iced Coffee", description: "A refreshing blend of chilled coffee...", rating: 4, cookingTime: "30min"),
-//        .init(image: "tofu-and-noodles", name: "Tofu and Noodles", description: "Tender tofu mixed with slurpy noodles", rating: 4, cookingTime: "30min")
-    ]
+    private let userId = Auth.auth().currentUser?.uid
+    private var favoriteRecipes: Set<String> = []
+    private var mostViewedTodayList: [YourRecipeModel] = []
+    private var recipesList: [RecipeModel] = []
     private let mostViewedTodayView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(named: "RedPinkMain")
@@ -62,10 +54,21 @@ class YourRecipesViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        fetchRecipes()
+        fetchFavorites()
         setupCustomBackButton()
+        navigationItem.title = "Your Recipes"
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         mostViewedTodayCollectionView.dataSource = self
+        mostViewedTodayCollectionView.delegate = self
         recipesCollectionView.dataSource = self
+        recipesCollectionView.delegate = self
         mostViewedTodayCollectionView.backgroundColor = .clear
         setupUI()
         navigationController?.setNavigationBarHidden(false, animated: false)
@@ -124,6 +127,146 @@ class YourRecipesViewController: UIViewController {
             make.bottom.equalToSuperview()
         }
     }
+    private func fetchRecipes(){
+        guard let id = userId else {
+            self.showAlert(title: "Invalid user", message: "No such user exists")
+            return
+        }
+        let db = Firestore.firestore()
+        db.collection("users").whereField("userId", isEqualTo: id).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    let fullname = document.data()["fullname"] as! String
+                    let name = fullname.components(separatedBy: " ")[0]
+                    let surname = fullname.components(separatedBy: " ")[1]
+                    db.collection("recipes").whereField("chef.name", isEqualTo: name).whereField("chef.surname", isEqualTo: surname).getDocuments { querySnapshot2, error2 in
+                        if let error = error2 {
+                            self.showAlert(title: "Server error", message: error.localizedDescription)
+                        } else {
+                            for documentRecipe in querySnapshot2!.documents{
+                                print(documentRecipe,"Hello")
+                                let chef = documentRecipe.data()["chef"] as! [String: String]
+                                if documentRecipe.data()["rating"] as! Int == 5{
+                                    self.mostViewedTodayList.append(YourRecipeModel(
+                                        image: documentRecipe.data()["image"] as! String,
+                                        title: documentRecipe.data()["name"] as! String,
+                                        rating: documentRecipe.data()["rating"] as! Int,
+                                        time: documentRecipe.data()["cookingTime"] as! String,
+                                        taste: documentRecipe.data()["taste"] as! String
+                                    ))
+                                } else {
+                                    self.recipesList.append(RecipeModel(
+                                        name: documentRecipe.data()["name"] as! String,
+                                        image: documentRecipe.data()["image"] as! String,
+                                        description: documentRecipe.data()["description"] as! String,
+                                        rating: documentRecipe.data()["rating"] as! Int,
+                                        cookingTime: documentRecipe.data()["cookingTime"] as! String,
+                                        taste: documentRecipe.data()["taste"] as! String))
+                                }
+                            }
+                            DispatchQueue.main.async {
+                                self.mostViewedTodayCollectionView.reloadData()
+                                self.recipesCollectionView.reloadData()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private func fetchFavorites() {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                self.favoriteRecipes.removeAll()
+                for document in querySnapshot!.documents {
+                    self.favoriteRecipes.insert(document.documentID)
+                }
+                DispatchQueue.main.async {
+                    self.mostViewedTodayCollectionView.reloadData()
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    private func toggleFavoriteMostViewed(for recipe: YourRecipeModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.title)
+        
+        if favoriteRecipes.contains(recipe.title) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.remove(recipe.title)
+                    self.mostViewedTodayCollectionView.reloadData()
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.title,
+                "image": recipe.image,
+                "rating": recipe.rating,
+                "cookingTime": recipe.time,
+                "taste": recipe.taste
+            ]) { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.insert(recipe.title)
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    private func toggleFavorite(for recipe: RecipeModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.name)
+        
+        if favoriteRecipes.contains(recipe.name) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.remove(recipe.name)
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.name,
+                "image": recipe.image,
+                "description": recipe.description,
+                "rating": recipe.rating,
+                "cookingTime": recipe.cookingTime,
+                "taste": recipe.taste
+            ]) { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.insert(recipe.name)
+                    self.recipesCollectionView.reloadData()
+                }
+            }
+        }
+    }
+}
+extension YourRecipesViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == mostViewedTodayCollectionView{
+            let vc = TrendingRecipesDetailViewController(productName: mostViewedTodayList[indexPath.row].title)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+        if collectionView == recipesCollectionView {
+            let vc = TrendingRecipesDetailViewController(productName: recipesList[indexPath.row].name)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
 }
 extension YourRecipesViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -138,12 +281,22 @@ extension YourRecipesViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == mostViewedTodayCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: YourRecipeCollectionViewCell.identifier, for: indexPath) as! YourRecipeCollectionViewCell
-            cell.configure(mostViewedTodayList[indexPath.row])
+            let recipe = mostViewedTodayList[indexPath.row]
+            let isFavorite = favoriteRecipes.contains(recipe.title)
+            cell.configure(recipe, isFavorite)
+            cell.favoriteButtonTapped = {
+                self.toggleFavoriteMostViewed(for: recipe)
+            }
             return cell
         }
         if collectionView == recipesCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-            cell.configure(recipesList[indexPath.row], isFavorite: false)
+            let recipe = recipesList[indexPath.row]
+            let isFavorite = favoriteRecipes.contains(recipe.name)
+            cell.configure(recipe, isFavorite: isFavorite)
+            cell.favoriteButtonTapped = {
+                self.toggleFavorite(for: recipe)
+            }
             return cell
         }
         return UICollectionViewCell()

@@ -13,5 +13,6 @@ struct TrendingRecipeItemModel{
     let time: String
     let level: String
     let rating: Int
+    let taste: String
 }
 

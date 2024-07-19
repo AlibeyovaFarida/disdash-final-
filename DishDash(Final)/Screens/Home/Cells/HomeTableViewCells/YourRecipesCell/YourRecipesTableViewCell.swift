@@ -1,7 +1,19 @@
+
+
+
+
+
 import UIKit
+import Firebase
+
+protocol YourRecipesTableViewCellDelegate: AnyObject {
+    func yourRecipesTableViewCell(_ cell: YourRecipesTableViewCell, didSelectItem item: YourRecipeModel)
+}
 
 class YourRecipesTableViewCell: UITableViewCell {
-
+    weak var delegate: YourRecipesTableViewCellDelegate?
+    private var favoriteRecipes: Set<String> = []
+    private let userId = Auth.auth().currentUser?.uid
     private var receipeList: [YourRecipeModel] = []
     
     private let pinkBackgroundView: UIView = {
@@ -35,6 +47,7 @@ class YourRecipesTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         collectionView.dataSource = self
+        collectionView.delegate = self
         selectionStyle = .none
         collectionView.backgroundColor = UIColor(named: "RedPinkMain")
         setupUI()
@@ -66,8 +79,43 @@ class YourRecipesTableViewCell: UITableViewCell {
             make.height.equalTo(195)
         }
     }
+    private func toggleFavorite(for recipe: YourRecipeModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.title)
+        
+        if favoriteRecipes.contains(recipe.title) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    print("Server error")
+                } else {
+                    self.favoriteRecipes.remove(recipe.title)
+                    self.collectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.title,
+                "image": recipe.image,
+                "rating": recipe.rating,
+                "cookingTime": recipe.time,
+                "taste": recipe.taste
+            ]) { error in
+                if let error = error {
+                    print("Server error")
+                } else {
+                    self.favoriteRecipes.insert(recipe.title)
+                    self.collectionView.reloadData()
+                }
+            }
+        }
+    }
 }
-
+extension YourRecipesTableViewCell: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedItem = receipeList[indexPath.row]
+        delegate?.yourRecipesTableViewCell(self, didSelectItem: selectedItem)
+    }
+}
 extension YourRecipesTableViewCell: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -76,7 +124,12 @@ extension YourRecipesTableViewCell: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: YourRecipeCollectionViewCell.identifier, for: indexPath) as! YourRecipeCollectionViewCell
-        cell.configure(receipeList[indexPath.row])
+        var recipe = receipeList[indexPath.row]
+        let isFavorite = favoriteRecipes.contains(recipe.title)
+        cell.configure(recipe, isFavorite)
+        cell.favoriteButtonTapped = {
+            self.toggleFavorite(for: recipe)
+        }
         return cell
     }
     

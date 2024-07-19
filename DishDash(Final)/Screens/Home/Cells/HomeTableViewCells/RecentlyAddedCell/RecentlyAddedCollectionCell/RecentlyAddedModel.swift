@@ -11,4 +11,5 @@ struct RecentlyAddedModel: Equatable {
     let description: String
     let rating: Int
     let time: String
+    let taste: String
 }

@@ -16,4 +16,5 @@ struct CommunityCardModel{
     let description: String
     let cookingTime: String
     let comment: Int
+    let taste: String
 }

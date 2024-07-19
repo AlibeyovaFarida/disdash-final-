@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Firebase
 
 class ProfileFollowingViewController: UIViewController {
     private let followingProfileList: [FollowingProfileItemModel] = [
@@ -42,6 +43,7 @@ class ProfileFollowingViewController: UIViewController {
         let sv = UIStackView()
         sv.axis = .vertical
         sv.alignment = .center
+        sv.isUserInteractionEnabled = true
         return sv
     }()
     private let followingTabLabel: UILabel = {
@@ -61,6 +63,7 @@ class ProfileFollowingViewController: UIViewController {
         let sv = UIStackView()
         sv.axis = .vertical
         sv.alignment = .center
+        sv.isUserInteractionEnabled = true
         return sv
     }()
     private let followersTabLabel: UILabel = {
@@ -108,12 +111,32 @@ class ProfileFollowingViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupCustomBackButton()
+        let tapGestureFollowing = UITapGestureRecognizer(target: self, action: #selector(didTapFollowing))
+        followingTabStackView.addGestureRecognizer(tapGestureFollowing)
+        let tapGestureFollowers = UITapGestureRecognizer(target: self, action: #selector(didTapFollowers))
+        followersTabStackView.addGestureRecognizer(tapGestureFollowers)
         view.backgroundColor = UIColor(named: "WhiteBeige")
         followTableView.dataSource = self
         followTableView.separatorStyle = .none
         setupUI()
     }
-    
+    @objc
+    private func didTapFollowing(){
+        followingTabBottomLineImageView.tintColor = UIColor(named: "RedPinkMain")
+        followersTabBottomLineImageView.tintColor = UIColor(named: "WhiteBeige")
+        DispatchQueue.main.async {
+            self.followTableView.reloadData()
+        }
+    }
+    @objc
+    private func didTapFollowers(){
+        followingTabBottomLineImageView.tintColor = UIColor(named: "WhiteBeige")
+        followersTabBottomLineImageView.tintColor = UIColor(named: "RedPinkMain")
+        DispatchQueue.main.async {
+            self.followTableView.reloadData()
+        }
+    }
     private func setupUI(){
         view.addSubview(switchStackView)
         [
@@ -156,6 +179,28 @@ class ProfileFollowingViewController: UIViewController {
             make.bottom.equalToSuperview()
         }
     }
+    private func setupCustomBackButton() {
+        guard let backButtonImage = UIImage(named: "back-button") else {
+                print("Error: Back button image not found.")
+                return
+            }
+            
+        let backButton = UIButton(type: .custom)
+        backButton.setImage(backButtonImage, for: .normal)
+        backButton.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+            
+        let backBarButtonItem = UIBarButtonItem(customView: backButton)
+        navigationItem.leftBarButtonItem = backBarButtonItem
+            
+        backButton.snp.makeConstraints { make in
+            make.width.equalTo(22.4)
+            make.height.equalTo(14)
+        }
+    }
+    @objc
+    private func didTapBackButton() {
+        navigationController?.popViewController(animated: true)
+    }
 }
 
 extension ProfileFollowingViewController: UITableViewDataSource{
@@ -169,12 +214,12 @@ extension ProfileFollowingViewController: UITableViewDataSource{
         return 0
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if !followingTabBottomLineImageView.isHidden{
+        if followingTabBottomLineImageView.tintColor == UIColor(named: "RedPinkMain") {
             let cell = tableView.dequeueReusableCell(withIdentifier: FollowingTableViewCell.identifier, for: indexPath) as! FollowingTableViewCell
             cell.configure(followingProfileList[indexPath.row])
             return cell
         }
-        if !followersTabBottomLineImageView.isHidden{
+        if followersTabBottomLineImageView.tintColor == UIColor(named: "RedPinkMain"){
             let cell = tableView.dequeueReusableCell(withIdentifier: FollowersProfileTableViewCell.identifier, for: indexPath) as! FollowersProfileTableViewCell
             cell.configure(followersProfileList[indexPath.row])
             return cell

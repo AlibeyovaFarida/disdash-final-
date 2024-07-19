@@ -8,7 +8,7 @@
 import UIKit
 
 class CommunityCardCollectionViewCell: UICollectionViewCell {
-    
+    var favoriteButtonTapped: (() -> Void)?
     private let cardStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
@@ -57,17 +57,24 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         view.backgroundColor = UIColor(named: "RedPinkMain")
         return view
     }()
+    private let favButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = UIColor(named: "RedPinkMain")
+        btn.setImage(UIImage(named: "fav-icon"), for: .normal)
+        btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
+        btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(favButtonTapped), for: .touchUpInside)
+        return btn
+    }()
+    @objc private func favButtonTapped() {
+        favoriteButtonTapped?()
+    }
     private let communityRecipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
         iv.layer.cornerRadius = 14
         return iv
     }()
-//    private let communityRecipeDescriptionStackView: UIStackView = {
-//        let sv = UIStackView()
-//        sv.axis = .vertical
-//        return sv
-//    }()
     private let recipeNameRatingStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .horizontal
@@ -97,14 +104,6 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         lb.textColor = UIColor(named: "WhiteBeige")
         return lb
     }()
-//    private let descriptionTimeCommentStackView: UIStackView = {
-//        let sv = UIStackView()
-//        sv.axis = .horizontal
-//        sv.spacing = 10
-//        sv.distribution = .fillEqually
-//        sv.alignment = .center
-//        return sv
-//    }()
     private let descriptionLabel: UILabel = {
         let lb = UILabel()
         lb.font = UIFont(name: "LeagueSpartan-Light", size: 14)
@@ -169,7 +168,7 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupUI(){
-        contentView.addSubview(cardStackView) // +
+        contentView.addSubview(cardStackView)
         [
             authorStackView,
             communityRecipeCardView,
@@ -184,13 +183,10 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
             timeLabel
         ].forEach(usernameTimeLabelStackView.addArrangedSubview)
         communityRecipeCardView.addSubview(communityRecipeImageView)
+        communityRecipeCardView.addSubview(favButton)
         communityRecipeCardView.addSubview(recipeNameRatingStackView)
         communityRecipeCardView.addSubview(descriptionLabel)
         communityRecipeCardView.addSubview(cookingTimeCommentStackView)
-//        [
-//            recipeNameRatingStackView,
-//            descriptionTimeCommentStackView
-//        ].forEach(communityRecipeDescriptionStackView.addArrangedSubview)
         [
             recipeNameLabel,
             recipeRatingStackView,
@@ -200,10 +196,6 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
             ratingLabel,
             ratingImageView
         ].forEach(recipeRatingStackView.addArrangedSubview)
-//        [
-//            descriptionLabel,
-////            cookingTimeCommentStackView
-//        ].forEach(descriptionTimeCommentStackView.addArrangedSubview)
         [
             cookingTimeStackView,
             commentStackView
@@ -217,6 +209,11 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
             commentImageView
         ].forEach(commentStackView.addArrangedSubview)
         
+        favButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(7)
+            make.trailing.equalToSuperview().inset(8.52)
+            make.size.equalTo(28)
+        }
         cardStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -232,7 +229,6 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         recipeNameRatingStackView.snp.makeConstraints { make in
             make.top.equalTo(communityRecipeImageView.snp.bottom).offset(10)
             make.leading.equalToSuperview().inset(15)
-//            make.bottom.equalToSuperview().inset(6)
         }
         descriptionLabel.snp.makeConstraints { make in
 
@@ -260,7 +256,7 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
             make.height.equalTo(1)
         }
     }
-    func configure(_ item: CommunityCardModel){
+    func configure(_ item: CommunityCardModel, _ isFavorite: Bool){
         authorImageView.kf.setImage(with: URL(string: item.authorImage))
         usernameLabel.text = item.username
         timeLabel.text = dateFormatter.string(from: item.time)
@@ -270,5 +266,10 @@ class CommunityCardCollectionViewCell: UICollectionViewCell {
         descriptionLabel.text = item.description
         cookingTimeLabel.text = item.cookingTime
         commentLabel.text = "\(item.comment)"
+        updateFavButton(isFavorite: isFavorite)
+    }
+    private func updateFavButton(isFavorite: Bool) {
+        favButton.backgroundColor = isFavorite ? UIColor(named: "PinkBase") : UIColor(named: "RedPinkMain")
+        favButton.imageView?.tintColor = isFavorite ? UIColor(named: "PinkSubColor") : UIColor(named: "WhiteBeige")
     }
 }

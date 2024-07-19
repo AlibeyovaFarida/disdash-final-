@@ -88,7 +88,8 @@ class RecentlyAddedTableViewCell: UITableViewCell {
                 "image": recipe.image,
                 "description": recipe.description,
                 "rating": recipe.rating,
-                "cookingTime": recipe.time
+                "cookingTime": recipe.time,
+                "taste": recipe.taste
             ]) { error in
                 if let error = error {
                     print("Server error")

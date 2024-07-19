@@ -8,6 +8,7 @@
 import UIKit
 
 class YourRecipeCollectionViewCell: UICollectionViewCell {
+    var favoriteButtonTapped: (() -> Void)?
     private let recipeBackgroundView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -19,8 +20,13 @@ class YourRecipeCollectionViewCell: UICollectionViewCell {
         btn.setImage(UIImage(named: "fav-icon"), for: .normal)
         btn.imageView?.tintColor = UIColor(named: "WhiteBeige")
         btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(favButtonTapped), for: .touchUpInside)
         return btn
     }()
+    @objc
+    private func favButtonTapped(){
+        favoriteButtonTapped?()
+    }
     private let recipeImageView: UIImageView = {
         let iv = UIImageView()
         iv.layer.cornerRadius = 13
@@ -160,11 +166,15 @@ class YourRecipeCollectionViewCell: UICollectionViewCell {
             make.size.equalTo(10)
         }
     }
-    func configure(_ item: YourRecipeModel){
-        recipeImageView.image = UIImage(named: item.image)
+    func configure(_ item: YourRecipeModel, _ isFavorite: Bool){
+        recipeImageView.kf.setImage(with: URL(string: item.image))
         recipeNameLabel.text = item.title
         ratingLabel.text = "\(item.rating)"
-        cookingTimeLabel.text = "\(item.time)min"
+        cookingTimeLabel.text = "\(item.time)"
+        updateFavButton(isFavorite: isFavorite)
     }
-    
+    private func updateFavButton(isFavorite: Bool) {
+        favButton.backgroundColor = isFavorite ? UIColor(named: "PinkBase") : UIColor(named: "RedPinkMain")
+        favButton.imageView?.tintColor = isFavorite ? UIColor(named: "PinkSubColor") : UIColor(named: "WhiteBeige")
+    }
 }

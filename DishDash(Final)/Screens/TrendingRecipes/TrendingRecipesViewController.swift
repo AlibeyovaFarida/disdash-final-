@@ -196,7 +196,9 @@ class TrendingRecipesViewController: UIViewController {
                             chefName: chef["name"]!,
                             time: document.data()["cookingTime"] as! String,
                             level: document.data()["level"] as! String,
-                            rating: document.data()["rating"] as! Int))
+                            rating: document.data()["rating"] as! Int,
+                            taste: document.data()["taste"] as? String ?? ""
+                        ))
                     } else {
                         print("Server error")
                     }
@@ -242,7 +244,8 @@ class TrendingRecipesViewController: UIViewController {
                 "image": recipe.image,
                 "description": recipe.description,
                 "rating": recipe.rating,
-                "cookingTime": recipe.time
+                "cookingTime": recipe.time,
+                "taste": recipe.taste
             ]) { error in
                 if let error = error {
                     self.showAlert(title: "Server error", message: error.localizedDescription)

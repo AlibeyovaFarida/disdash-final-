@@ -114,7 +114,8 @@ class CategoryProductsViewController: UIViewController {
                         image: document.data()["image"] as! String,
                         description: document.data()["description"] as! String,
                         rating: document.data()["rating"] as! Int,
-                        cookingTime: document.data()["cookingTime"] as! String
+                        cookingTime: document.data()["cookingTime"] as! String,
+                        taste: document.data()["taste"] as! String
                     ))
                 }
                 DispatchQueue.main.async {
@@ -161,7 +162,8 @@ class CategoryProductsViewController: UIViewController {
                 "image": recipe.image,
                 "description": recipe.description,
                 "rating": recipe.rating,
-                "cookingTime": recipe.cookingTime
+                "cookingTime": recipe.cookingTime,
+                "taste": recipe.taste
             ]) { error in
                 if let error = error {
                     self.showAlert(title: "Server error", message: error.localizedDescription)

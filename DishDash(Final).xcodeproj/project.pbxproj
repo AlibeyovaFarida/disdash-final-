@@ -33,6 +33,7 @@
 		182D03B52C25AE6E00413FBE /* TopChefViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182D03B42C25AE6E00413FBE /* TopChefViewController.swift */; };
 		1837CB2A2C1650280092D025 /* TopChefTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1837CB292C1650280092D025 /* TopChefTableViewCell.swift */; };
 		1837CB2C2C1650500092D025 /* TopChefCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1837CB2B2C1650500092D025 /* TopChefCollectionViewCell.swift */; };
+		183853A22C4AE9C600EC13F6 /* CreateRecipeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 183853A12C4AE9C600EC13F6 /* CreateRecipeViewController.swift */; };
 		184290B32C318E110009B0AD /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184290B22C318E110009B0AD /* ProfileViewController.swift */; };
 		185EBA5C2C16645700AA19E5 /* ChefModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 185EBA5B2C16645700AA19E5 /* ChefModel.swift */; };
 		1865EB192C4690AE006D79EE /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1865EB182C4690AE006D79EE /* FirebaseAnalytics */; };
@@ -222,6 +223,7 @@
 		182D03B42C25AE6E00413FBE /* TopChefViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopChefViewController.swift; sourceTree = "<group>"; };
 		1837CB292C1650280092D025 /* TopChefTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopChefTableViewCell.swift; sourceTree = "<group>"; };
 		1837CB2B2C1650500092D025 /* TopChefCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopChefCollectionViewCell.swift; sourceTree = "<group>"; };
+		183853A12C4AE9C600EC13F6 /* CreateRecipeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateRecipeViewController.swift; sourceTree = "<group>"; };
 		184290B22C318E110009B0AD /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		185EBA5B2C16645700AA19E5 /* ChefModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChefModel.swift; sourceTree = "<group>"; };
 		18694A4E2C22CF77000327EE /* TrendingRecipeDetailAuthorTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingRecipeDetailAuthorTableViewCell.swift; sourceTree = "<group>"; };
@@ -576,6 +578,14 @@
 			path = TopChefCollectionCell;
 			sourceTree = "<group>";
 		};
+		183853A02C4AE9A900EC13F6 /* CreateRecipe */ = {
+			isa = PBXGroup;
+			children = (
+				183853A12C4AE9C600EC13F6 /* CreateRecipeViewController.swift */,
+			);
+			path = CreateRecipe;
+			sourceTree = "<group>";
+		};
 		184290B12C318DE20009B0AD /* Profile */ = {
 			isa = PBXGroup;
 			children = (
@@ -669,6 +679,7 @@
 		18739FBA2C00946D00CD4F60 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				183853A02C4AE9A900EC13F6 /* CreateRecipe */,
 				189636132C3FDBD800AE3563 /* Search */,
 				18D7B9AE2C1C64E600A8C1AF /* Categories */,
 				18D474A92C30A26800B19696 /* CategoryProducts */,
@@ -1363,6 +1374,7 @@
 				182D03AD2C255A3400413FBE /* ReviewsViewController.swift in Sources */,
 				182A0E032C284F5A004DB60B /* TopChefsModel.swift in Sources */,
 				18D6BC322C05D691009C783F /* CookingLevelTableViewCell.swift in Sources */,
+				183853A22C4AE9C600EC13F6 /* CreateRecipeViewController.swift in Sources */,
 				18D7B9B32C1C7ADE00A8C1AF /* CategoriesCollectionViewCell.swift in Sources */,
 				181059B32C29B22E007B66BD /* ChefCollectionRecipesModel.swift in Sources */,
 				182D03B52C25AE6E00413FBE /* TopChefViewController.swift in Sources */,

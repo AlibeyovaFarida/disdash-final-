@@ -60,7 +60,9 @@ class RecipesViewController: UIViewController {
                     image: document.data()["image"] as! String,
                     description: document.data()["description"] as! String,
                     rating: document.data()["rating"] as! Int,
-                    cookingTime: document.data()["cookingTime"] as! String))
+                    cookingTime: document.data()["cookingTime"] as! String,
+                    taste: document.data()["taste"] as! String
+                ))
                 }
                 DispatchQueue.main.async {
                     self.recipesCollectionView.reloadData()

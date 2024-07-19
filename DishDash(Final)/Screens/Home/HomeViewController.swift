@@ -29,7 +29,10 @@ struct HomeModel: Hashable {
 typealias HomeDataSource = UITableViewDiffableDataSource<HomeSection, HomeModel>
 
 class HomeViewController: UIViewController{
+    
+    private let userId = Auth.auth().currentUser?.uid
     private var recentlyAddedProducts: [RecentlyAddedModel] = []
+    private var yourRecipesProducts: [YourRecipeModel] = []
     private lazy var homeDataSource: HomeDataSource = makeHomeDataSource()
     
     private let categoryList: [CategoryModel] = [
@@ -134,35 +137,58 @@ class HomeViewController: UIViewController{
                         name: document.data()["name"] as! String,
                         description: document.data()["description"] as! String,
                         rating: document.data()["rating"] as! Int,
-                        time: document.data()["cookingTime"] as! String))
+                        time: document.data()["cookingTime"] as! String,
+                        taste: document.data()["taste"] as! String))
                 }
                 DispatchQueue.main.async {
                     self.applySnapshot()
                 }
             }
+            guard let id = self.userId else {
+                self.showAlert(title: "Invalid user", message: "No such user exists")
+                return
+            }
+        db.collection("users").whereField("userId", isEqualTo: id).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    let fullname = document.data()["fullname"] as! String
+                    let name = fullname.components(separatedBy: " ")[0]
+                    let surname = fullname.components(separatedBy: " ")[1]
+                    db.collection("recipes").whereField("chef.name", isEqualTo: name).whereField("chef.surname", isEqualTo: surname).getDocuments { querySnapshot2, error2 in
+                        if let error = error2 {
+                            self.showAlert(title: "Server error", message: error.localizedDescription)
+                        } else {
+                            for documentRecipe in querySnapshot2!.documents{
+                                print(documentRecipe,"Hello")
+                                let chef = documentRecipe.data()["chef"] as! [String: String]
+                                    self.yourRecipesProducts.append(YourRecipeModel(
+                                        image: documentRecipe.data()["image"] as! String,
+                                        title: documentRecipe.data()["name"] as! String,
+                                        rating: documentRecipe.data()["rating"] as! Int,
+                                        time: documentRecipe.data()["cookingTime"] as! String,
+                                        taste: documentRecipe.data()["taste"] as! String))
+                            }
+                            DispatchQueue.main.async {
+                                self.applySnapshot()
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
         
-        view.backgroundColor = UIColor(named: "WhiteBeige")
-//        self.navigationController?.setNavigationBarHidden(true, animated: true)
-        categoryCollectionView.backgroundColor = .clear
-        categoryCollectionView.dataSource = self
-        categoryCollectionView.delegate = self
-        setupUI()
-        tableView.delegate = self
-        tableView.dataSource = homeDataSource
-        applySnapshot()
-    }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        // Hide the navigation bar
-//        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        // Hide the navigation bar
-//        navigationController?.setNavigationBarHidden(true, animated: false)
-    }
+    view.backgroundColor = UIColor(named: "WhiteBeige")
+    categoryCollectionView.backgroundColor = .clear
+    categoryCollectionView.dataSource = self
+    categoryCollectionView.delegate = self
+    setupUI()
+    tableView.delegate = self
+    tableView.dataSource = homeDataSource
+    applySnapshot()
+}
     private func setupUI(){
         view.addSubview(headerContainerView)
         view.addSubview(categoryCollectionView)
@@ -213,6 +239,7 @@ class HomeViewController: UIViewController{
             if indexPath.section == 1 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: YourRecipesTableViewCell.identifier) as! YourRecipesTableViewCell
                 cell.configure(itemIdentifier.yourRecipes)
+                cell.delegate = self
                 return cell
             }
             if indexPath.section == 2 {
@@ -233,12 +260,8 @@ class HomeViewController: UIViewController{
         var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeModel>()
         snapshot.appendSections([.trendingRecipe, .yourRecipes, .topChef, .recentlyAdded])
         snapshot.appendItems([.init(yourRecipes: [], topChef: [], recentlyAdded: [])], toSection: .trendingRecipe)
-        snapshot.appendItems([.init(yourRecipes: [
-            .init(image: "chicken-burger", title: "Chicken Burger", rating: 5, time: 15),
-            .init(image: "tiramisu", title: "Tiramisu", rating: 5, time: 15),
-            .init(image: "chicken-burger", title: "Chicken Burger", rating: 5, time: 15),
-            .init(image: "tiramisu", title: "Tiramisu", rating: 5, time: 15),
-        ], topChef: [], recentlyAdded: [])], toSection: .yourRecipes)
+        snapshot.appendItems([.init(yourRecipes: yourRecipesProducts,
+                                     topChef: [], recentlyAdded: [])], toSection: .yourRecipes)
         snapshot.appendItems([.init(yourRecipes: [], topChef: [
             .init(image: "joseph", name: "Joseph"),
             .init(image: "andrew", name: "Andrew"),
@@ -263,7 +286,7 @@ extension HomeViewController: UICollectionViewDataSource {
 extension HomeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let vc = CategoryProductsViewController(categoryName: categoryList[indexPath.row].title)
-        navigationController?.pushViewController(vc, animated: false)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -284,6 +307,12 @@ extension HomeViewController: UITableViewDelegate {
 extension HomeViewController: RecentlyAddedTableViewCellDelegate {
     func recentlyAddedTableViewCell(_ cell: RecentlyAddedTableViewCell, didSelectItem item: RecentlyAddedModel) {
         let vc = TrendingRecipesDetailViewController(productName: item.name)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+}
+extension HomeViewController: YourRecipesTableViewCellDelegate {
+    func yourRecipesTableViewCell(_ cell: YourRecipesTableViewCell, didSelectItem item: YourRecipeModel){
+        let vc = TrendingRecipesDetailViewController(productName: item.title)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

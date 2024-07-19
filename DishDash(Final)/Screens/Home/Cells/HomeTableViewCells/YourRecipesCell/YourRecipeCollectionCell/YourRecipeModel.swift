@@ -9,5 +9,6 @@ struct YourRecipeModel: Equatable{
     let image: String
     let title: String
     let rating: Int
-    let time: Int
+    let time: String
+    let taste: String
 }

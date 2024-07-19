@@ -10,14 +10,9 @@ import FirebaseAuth
 import Firebase
 
 class ProfileViewController: UIViewController {
-    private var recipeList: [RecipeModel] = [
-        .init(name: "Crispy Shrimp", image: "crispy-shrimp", description: "A feast for the senses", rating: 4, cookingTime: "20min"),
-        .init(name: "Chicken Wings", image: "chicken-wings", description: "Delicious and juicy wings", rating: 5, cookingTime: "30min"),
-        .init(name: "Colors Macarons", image: "colors-macarons", description: "Sweet bites full of elegance", rating: 4, cookingTime: "40min"),
-        .init(name: "Pina Colada", image: "pina-colada", description: "A tropical explosion in every sip", rating: 4, cookingTime: "30min"),
-        .init(name: "Spring Rolls", image: "spring-rolls", description: "Delicate and full of flavor", rating: 4, cookingTime: "30min"),
-        .init(name: "French Toast", image: "french-toast", description: "Delicious slices of bread", rating: 4, cookingTime: "30min")
-    ]
+    let userId = Auth.auth().currentUser?.uid
+    private var favoriteRecipes: Set<String> = []
+    private var recipeList: [RecipeModel] = []
     
     private let favoritesCategoryList: [FavoritesCategoryItemModel] = [
         .init(image: "sweet", name: "Sweet"),
@@ -47,8 +42,14 @@ class ProfileViewController: UIViewController {
         btn.backgroundColor = UIColor(named: "PinkBase")
         btn.frame = CGRect(x: 0, y: 0, width: 28, height: 28)
         btn.layer.cornerRadius = 14
+        btn.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
         return btn
     }()
+    @objc 
+    private func didTapAddButton(){
+        let vc = CreateRecipeViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
     private let logoutButton: UIButton = {
         let btn = UIButton()
         btn.setImage(UIImage(named: "log-out"), for: .normal)
@@ -77,14 +78,14 @@ class ProfileViewController: UIViewController {
         sv.axis = .vertical
         return sv
     }()
-    private let nameLabel: UILabel = {
+    private var nameLabel: UILabel = {
         let lb = UILabel()
         lb.font = UIFont(name: "Poppins-Medium", size: 15)
         lb.textColor = UIColor(named: "RedPinkMain")
         lb.text = "Dianne Russell"
         return lb
     }()
-    private let usernameLabel: UILabel = {
+    private var usernameLabel: UILabel = {
         let lb = UILabel()
         lb.font = UIFont(name: "Poppins-Regular", size: 12)
         lb.textColor = UIColor(named: "PinkSubColor")
@@ -174,6 +175,7 @@ class ProfileViewController: UIViewController {
         let sv = UIStackView()
         sv.axis = .vertical
         sv.alignment = .center
+        sv.isUserInteractionEnabled = true
         return sv
     }()
     private let followingCountLabel: UILabel = {
@@ -298,14 +300,29 @@ class ProfileViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        fetchRecipes()
+        fetchFavorites()
+        let tapGestureFollowing = UITapGestureRecognizer(target: self, action: #selector(didTapFollow))
+        followingStackView.addGestureRecognizer(tapGestureFollowing)
+        let tapGestureFollowers = UITapGestureRecognizer(target: self, action: #selector(didTapFollow))
+        followersStackView.addGestureRecognizer(tapGestureFollowers)
         let tapGestureRecipeTab = UITapGestureRecognizer(target: self, action: #selector(didTapRecipeTab))
         recipeTabLabel.addGestureRecognizer(tapGestureRecipeTab)
         let tapGestureFavoriteTab = UITapGestureRecognizer(target: self, action: #selector(didTapFavoriteTab))
         favoritesTabLabel.addGestureRecognizer(tapGestureFavoriteTab)
+        navigationItem.title = "Profile"
+        if let navigationBar = self.navigationController?.navigationBar {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(named: "RedPinkMain")!
+            ]
+            navigationBar.titleTextAttributes = textAttributes
+        }
         view.backgroundColor = UIColor(named: "WhiteBeige")
         recipeCollectionView.dataSource = self
+        recipeCollectionView.delegate = self
         favoritesCollectionView.isHidden = true
         favoritesCollectionView.dataSource = self
+        favoritesCollectionView.delegate = self
         setupUI()
     }
     @objc
@@ -322,8 +339,101 @@ class ProfileViewController: UIViewController {
         favoritesTabLineImageView.tintColor = UIColor(named: "RedPinkMain")
         recipeTabLineImageView.tintColor = UIColor(named: "WhiteBeige")
     }
-    
-    
+    @objc
+    private func didTapFollow(){
+        let vc = ProfileFollowingViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    private func fetchRecipes(){
+        guard let id = userId else {
+            self.showAlert(title: "Invalid user", message: "No such user exists")
+            return
+        }
+        let db = Firestore.firestore()
+        db.collection("users").whereField("userId", isEqualTo: id).getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                for document in querySnapshot!.documents{
+                    let fullname = document.data()["fullname"] as! String
+                    self.nameLabel.text = fullname
+                    let name = fullname.components(separatedBy: " ")[0]
+                    let surname = fullname.components(separatedBy: " ")[1]
+                    db.collection("recipes").whereField("chef.name", isEqualTo: name).whereField("chef.surname", isEqualTo: surname).getDocuments { querySnapshot2, error2 in
+                        if let error = error2 {
+                            self.showAlert(title: "Server error", message: error.localizedDescription)
+                        } else {
+                            for documentRecipe in querySnapshot2!.documents{
+                                print(documentRecipe,"Hello")
+                                let chef = documentRecipe.data()["chef"] as! [String: String]
+                                self.usernameLabel.text = chef["username"]!
+                                self.profileImageView.kf.setImage(with: URL(string: chef["image"]!))
+                                self.recipeList.append(RecipeModel(
+                                    name: documentRecipe.data()["name"] as! String,
+                                    image: documentRecipe.data()["image"] as! String,
+                                    description: documentRecipe.data()["description"] as! String,
+                                    rating: documentRecipe.data()["rating"] as! Int,
+                                    cookingTime: documentRecipe.data()["cookingTime"] as! String,
+                                    taste: documentRecipe.data()["taste"] as! String))
+                            }
+                            DispatchQueue.main.async {
+                                self.recipeCountLabel.text = "\(self.recipeList.count)"
+                                self.recipeCollectionView.reloadData()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    private func fetchFavorites() {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
+            if let error = error {
+                self.showAlert(title: "Server error", message: error.localizedDescription)
+            } else {
+                self.favoriteRecipes.removeAll()
+                for document in querySnapshot!.documents {
+                    self.favoriteRecipes.insert(document.documentID)
+                }
+                DispatchQueue.main.async {
+                    self.recipeCollectionView.reloadData()
+                }
+            }
+        }
+    }
+
+    private func toggleFavorite(for recipe: RecipeModel) {
+        let db = Firestore.firestore()
+        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.name)
+        
+        if favoriteRecipes.contains(recipe.name) {
+            recipeDocRef.delete { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.remove(recipe.name)
+                    self.recipeCollectionView.reloadData()
+                }
+            }
+        } else {
+            recipeDocRef.setData([
+                "name": recipe.name,
+                "image": recipe.image,
+                "description": recipe.description,
+                "rating": recipe.rating,
+                "cookingTime": recipe.cookingTime,
+                "taste": recipe.taste
+            ]) { error in
+                if let error = error {
+                    self.showAlert(title: "Server error", message: error.localizedDescription)
+                } else {
+                    self.favoriteRecipes.insert(recipe.name)
+                    self.recipeCollectionView.reloadData()
+                }
+            }
+        }
+    }
     private func setupUI(){
         view.addSubview(profileCardStackView)
         [
@@ -382,7 +492,7 @@ class ProfileViewController: UIViewController {
         view.addSubview(favoritesCollectionView)
         view.addSubview(bottomShadowImageView)
         profileCardStackView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(13.7)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
         }
         
@@ -472,6 +582,20 @@ class ProfileViewController: UIViewController {
         }
     }
 }
+
+extension ProfileViewController: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if collectionView == recipeCollectionView{
+            let vc = TrendingRecipesDetailViewController(productName: recipeList[indexPath.row].name)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+        if collectionView == favoritesCollectionView{
+            let vc = FavoriteCategoryProductsViewController(taste: favoritesCategoryList[indexPath.row].name)
+            navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+}
+
 extension ProfileViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == recipeCollectionView{
@@ -485,7 +609,12 @@ extension ProfileViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == recipeCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-            cell.configure(recipeList[indexPath.row], isFavorite: false)
+            let recipe = recipeList[indexPath.row]
+            let isFavorite = favoriteRecipes.contains(recipe.name)
+            cell.configure(recipe, isFavorite: isFavorite)
+            cell.favoriteButtonTapped = {
+                self.toggleFavorite(for: recipe)
+            }
             return cell
         }
         if collectionView == favoritesCollectionView {
