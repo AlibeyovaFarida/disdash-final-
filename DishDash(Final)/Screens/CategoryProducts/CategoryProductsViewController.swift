@@ -16,6 +16,12 @@ class CategoryProductsViewController: UIViewController {
         .init(name: "Sea Food", isSelected: false)
     ]
     private var categoryProductsList: [RecipeModel] = []
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let categoryListCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -99,6 +105,7 @@ class CategoryProductsViewController: UIViewController {
     }
     
     private func fetchRecipes() {
+        self.activityIndicator.startAnimating()
         let db = Firestore.firestore()
         for (index, _) in self.categoryNameList.enumerated(){
             categoryNameList[index].isSelected = categoryName == categoryNameList[index].name
@@ -121,6 +128,7 @@ class CategoryProductsViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.categoryProductsCollectionView.reloadData()
                     self.categoryListCollectionView.reloadData()
+                    self.activityIndicator.stopAnimating()
                 }
             }
         }
@@ -176,6 +184,7 @@ class CategoryProductsViewController: UIViewController {
     }
 
     private func setupUI() {
+        view.addSubview(activityIndicator)
         view.addSubview(categoryListCollectionView)
         view.addSubview(categoryProductsCollectionView)
         view.addSubview(bottomShadowImageView)
@@ -185,7 +194,10 @@ class CategoryProductsViewController: UIViewController {
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.height.equalTo(39)
         }
-        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         categoryProductsCollectionView.snp.makeConstraints { make in
             make.top.equalTo(categoryListCollectionView.snp.bottom).offset(19)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)

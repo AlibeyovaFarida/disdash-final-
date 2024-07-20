@@ -10,6 +10,12 @@ import Firebase
 
 class CategoriesViewController: UIViewController {
     private var categoriesList: [CategoryItemModel] = []
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.showsVerticalScrollIndicator = false
@@ -57,6 +63,7 @@ class CategoriesViewController: UIViewController {
         super.viewDidLoad()
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didSelectSeafoodCategory))
         seafoodImageView.addGestureRecognizer(tapGesture)
+        activityIndicator.startAnimating()
         let db = Firestore.firestore()
         db.collection("categories").whereField("name", isEqualTo: "Seafood").getDocuments { querySnapshot, error in
             if let error = error {
@@ -77,6 +84,7 @@ class CategoriesViewController: UIViewController {
                 }
                 DispatchQueue.main.async {
                     self.categoriesCollectionView.reloadData()
+                    self.activityIndicator.stopAnimating()
                 }
             }
         }
@@ -100,7 +108,12 @@ class CategoriesViewController: UIViewController {
     }
     private func setupUI(){
         view.addSubview(scrollView)
+        view.addSubview(activityIndicator)
         scrollView.addSubview(contentViewInScroll)
+        NSLayoutConstraint.activate([
+               activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+               activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+           ])
         view.addSubview(bottomShadowImageView)
         [
             seafoodCategoryStackView,

@@ -27,7 +27,7 @@ class OnboardingCViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 24
-        layout.minimumInteritemSpacing = 24
+        layout.minimumInteritemSpacing = 16
         let screenWidth = UIScreen.main.bounds.width
         layout.itemSize = .init(width: screenWidth/2-44, height: screenWidth/2-44)
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)

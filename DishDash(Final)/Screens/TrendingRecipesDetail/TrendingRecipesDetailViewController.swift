@@ -36,6 +36,12 @@ class TrendingRecipesDetailViewController: UIViewController {
     private var stepsList: [EasyStep] = []
     private var productName: String = ""
     private lazy var trendingRecipeDetailDataSource: TrendingRecipeDetailDataSource = makeTrendingRecipeDetailDataSource()
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let trendingRecipeVideoView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(named: "RedPinkMain")
@@ -119,7 +125,7 @@ class TrendingRecipesDetailViewController: UIViewController {
     override func viewDidLoad() {
         setupCustomBackButton()
         super.viewDidLoad()
-        
+        activityIndicator.startAnimating()
         let db = Firestore.firestore()
         db.collection("recipes").whereField("name", isEqualTo: productName).getDocuments { querySnapshot, error in
             if let error = error {
@@ -159,6 +165,7 @@ class TrendingRecipesDetailViewController: UIViewController {
                 }
                 DispatchQueue.main.async {
                     self.applySnapshot()
+                    self.activityIndicator.stopAnimating()
                 }
             }
         }
@@ -175,6 +182,7 @@ class TrendingRecipesDetailViewController: UIViewController {
         trendingRecipeDetailTableView.dataSource = trendingRecipeDetailDataSource
         DispatchQueue.main.async {
             self.applySnapshot()
+            self.activityIndicator.stopAnimating()
         }
     }
     init(productName: String){
@@ -208,6 +216,7 @@ class TrendingRecipesDetailViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     private func setupUI(){
+        view.addSubview(activityIndicator)
         view.addSubview(trendingRecipeVideoView)
         view.addSubview(trendingRecipeDetailTableView)
         view.addSubview(bottomShadowImageView)
@@ -229,7 +238,10 @@ class TrendingRecipesDetailViewController: UIViewController {
             commentImageView,
             commentLabel
         ].forEach(commentStackView.addArrangedSubview)
-        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         trendingRecipeVideoView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).inset(29)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)

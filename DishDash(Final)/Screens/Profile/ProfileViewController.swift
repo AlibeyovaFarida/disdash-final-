@@ -26,6 +26,12 @@ class ProfileViewController: UIViewController {
         return sv
     }()
     
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let profileImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named: "dianne-russell")
@@ -100,38 +106,38 @@ class ProfileViewController: UIViewController {
         lb.numberOfLines = 0
         return lb
     }()
-    private let buttonsStackView: UIStackView = {
-        let sv = UIStackView()
-        sv.axis = .horizontal
-        sv.spacing = 6
-        return sv
-    }()
-    private let editButton: UIButton = {
-        let btn = UIButton()
-        btn.setTitle("Edit Profile", for: .normal)
-        btn.setTitleColor(UIColor(named: "PinkSubColor"), for: .normal)
-        btn.backgroundColor = UIColor(named: "PinkBase")
-        btn.layer.cornerRadius = 13.5
-        btn.frame = CGRect(x: 0, y: 0, width: 175, height: 27)
-        btn.titleLabel?.font = UIFont(name: "Poppins-Medium", size: 15)
-        btn.addTarget(self, action: #selector(didTapEditButton), for: .touchUpInside)
-        return btn
-    }()
-    @objc
-    private func didTapEditButton(){
-        let vc = EditProfileViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    private let shareButton: UIButton = {
-        let btn = UIButton()
-        btn.setTitle("Share Profile", for: .normal)
-        btn.setTitleColor(UIColor(named: "PinkSubColor"), for: .normal)
-        btn.backgroundColor = UIColor(named: "PinkBase")
-        btn.layer.cornerRadius = 13.5
-        btn.frame = CGRect(x: 0, y: 0, width: 175, height: 27)
-        btn.titleLabel?.font = UIFont(name: "Poppins-Medium", size: 15)
-        return btn
-    }()
+//    private let buttonsStackView: UIStackView = {
+//        let sv = UIStackView()
+//        sv.axis = .horizontal
+//        sv.spacing = 6
+//        return sv
+//    }()
+//    private let editButton: UIButton = {
+//        let btn = UIButton()
+//        btn.setTitle("Edit Profile", for: .normal)
+//        btn.setTitleColor(UIColor(named: "PinkSubColor"), for: .normal)
+//        btn.backgroundColor = UIColor(named: "PinkBase")
+//        btn.layer.cornerRadius = 13.5
+//        btn.frame = CGRect(x: 0, y: 0, width: 175, height: 27)
+//        btn.titleLabel?.font = UIFont(name: "Poppins-Medium", size: 15)
+//        btn.addTarget(self, action: #selector(didTapEditButton), for: .touchUpInside)
+//        return btn
+//    }()
+//    @objc
+//    private func didTapEditButton(){
+//        let vc = EditProfileViewController()
+//        navigationController?.pushViewController(vc, animated: true)
+//    }
+//    private let shareButton: UIButton = {
+//        let btn = UIButton()
+//        btn.setTitle("Share Profile", for: .normal)
+//        btn.setTitleColor(UIColor(named: "PinkSubColor"), for: .normal)
+//        btn.backgroundColor = UIColor(named: "PinkBase")
+//        btn.layer.cornerRadius = 13.5
+//        btn.frame = CGRect(x: 0, y: 0, width: 175, height: 27)
+//        btn.titleLabel?.font = UIFont(name: "Poppins-Medium", size: 15)
+//        return btn
+//    }()
     private let interactionView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 14
@@ -325,6 +331,7 @@ class ProfileViewController: UIViewController {
         favoritesCollectionView.delegate = self
         setupUI()
     }
+
     @objc
     private func didTapRecipeTab(){
         recipeCollectionView.isHidden = false
@@ -349,6 +356,7 @@ class ProfileViewController: UIViewController {
             self.showAlert(title: "Invalid user", message: "No such user exists")
             return
         }
+        self.activityIndicator.startAnimating()
         let db = Firestore.firestore()
         db.collection("users").whereField("userId", isEqualTo: id).getDocuments { querySnapshot, error in
             if let error = error {
@@ -379,6 +387,7 @@ class ProfileViewController: UIViewController {
                             DispatchQueue.main.async {
                                 self.recipeCountLabel.text = "\(self.recipeList.count)"
                                 self.recipeCollectionView.reloadData()
+                                self.activityIndicator.stopAnimating()
                             }
                         }
                     }
@@ -435,6 +444,7 @@ class ProfileViewController: UIViewController {
         }
     }
     private func setupUI(){
+        view.addSubview(activityIndicator)
         view.addSubview(profileCardStackView)
         [
             profileImageView,
@@ -448,11 +458,11 @@ class ProfileViewController: UIViewController {
             usernameLabel,
             descriptionLabel
         ].forEach(descriptionStackView.addArrangedSubview)
-        view.addSubview(buttonsStackView)
-        [
-            editButton,
-            shareButton
-        ].forEach(buttonsStackView.addArrangedSubview)
+//        view.addSubview(buttonsStackView)
+//        [
+//            editButton,
+//            shareButton
+//        ].forEach(buttonsStackView.addArrangedSubview)
         view.addSubview(interactionView)
         view.addSubview(switchStackView)
         [
@@ -495,7 +505,10 @@ class ProfileViewController: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
         }
-        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         profileImageView.snp.makeConstraints { make in
             make.width.equalTo(102)
             make.height.equalTo(97)
@@ -517,25 +530,25 @@ class ProfileViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
         }
         
-        buttonsStackView.snp.makeConstraints { make in
-            make.top.equalTo(profileCardStackView.snp.bottom).offset(12)
-            make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
-        }
-        
-        editButton.snp.makeConstraints { make in
-            let screenWidth = UIScreen.main.bounds.width
-            make.width.equalTo((screenWidth - 62) / 2)
-            make.height.equalTo(27)
-        }
-        
-        shareButton.snp.makeConstraints { make in
-            let screenWidth = UIScreen.main.bounds.width
-            make.width.equalTo((screenWidth - 62) / 2)
-            make.height.equalTo(27)
-        }
-        
+//        buttonsStackView.snp.makeConstraints { make in
+//            make.top.equalTo(profileCardStackView.snp.bottom).offset(12)
+//            make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
+//        }
+//        
+//        editButton.snp.makeConstraints { make in
+//            let screenWidth = UIScreen.main.bounds.width
+//            make.width.equalTo((screenWidth - 62) / 2)
+//            make.height.equalTo(27)
+//        }
+//        
+//        shareButton.snp.makeConstraints { make in
+//            let screenWidth = UIScreen.main.bounds.width
+//            make.width.equalTo((screenWidth - 62) / 2)
+//            make.height.equalTo(27)
+//        }
+//        
         interactionView.snp.makeConstraints { make in
-            make.top.equalTo(buttonsStackView.snp.bottom).offset(6)
+            make.top.equalTo(descriptionStackView.snp.bottom).offset(30)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(28)
         }
         
@@ -625,3 +638,4 @@ extension ProfileViewController: UICollectionViewDataSource {
         return UICollectionViewCell()
     }
 }
+

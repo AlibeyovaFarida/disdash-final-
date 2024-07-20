@@ -44,6 +44,12 @@ class HomeViewController: UIViewController{
         .init(title: "Drinks", isSelected: false),
         .init(title: "Sea Food", isSelected: false)
     ]
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let headerContainerView: UIView = {
         let view = UIView()
         return view
@@ -61,7 +67,6 @@ class HomeViewController: UIViewController{
     }()
     private let pinkLabel: UILabel = {
         let lb = UILabel()
-        lb.text = "Hi! Dianne"
         lb.font = UIFont(name: "Poppins-Regular", size: 25.3)
         lb.textColor = UIColor(named: "RedPinkMain")
         return lb
@@ -126,6 +131,8 @@ class HomeViewController: UIViewController{
     private let bottomShadowImageView = BottomShadowImageView()
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        activityIndicator.startAnimating()
         let db = Firestore.firestore()
         db.collection("recipes").order(by: "date", descending: true).limit(to: 6).getDocuments { querySnapshot, error in
             if let error = error {
@@ -142,6 +149,7 @@ class HomeViewController: UIViewController{
                 }
                 DispatchQueue.main.async {
                     self.applySnapshot()
+                    self.activityIndicator.stopAnimating()
                 }
             }
             guard let id = self.userId else {
@@ -156,6 +164,7 @@ class HomeViewController: UIViewController{
                     let fullname = document.data()["fullname"] as! String
                     let name = fullname.components(separatedBy: " ")[0]
                     let surname = fullname.components(separatedBy: " ")[1]
+                    self.pinkLabel.text = "Hi! \(name)"
                     db.collection("recipes").whereField("chef.name", isEqualTo: name).whereField("chef.surname", isEqualTo: surname).getDocuments { querySnapshot2, error2 in
                         if let error = error2 {
                             self.showAlert(title: "Server error", message: error.localizedDescription)
@@ -172,6 +181,7 @@ class HomeViewController: UIViewController{
                             }
                             DispatchQueue.main.async {
                                 self.applySnapshot()
+                                self.activityIndicator.stopAnimating()
                             }
                         }
                     }
@@ -191,7 +201,12 @@ class HomeViewController: UIViewController{
 }
     private func setupUI(){
         view.addSubview(headerContainerView)
+        view.addSubview(activityIndicator)
         view.addSubview(categoryCollectionView)
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         headerContainerView.addSubview(stackView)
         [
             textStackView,

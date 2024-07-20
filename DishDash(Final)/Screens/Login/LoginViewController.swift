@@ -70,27 +70,27 @@ class LoginViewController: UIViewController {
         sv.alignment = .center
         return sv
     }()
-    private let instagramImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(named: "instagram")
-        return iv
-    }()
+//    private let instagramImageView: UIImageView = {
+//        let iv = UIImageView()
+//        iv.image = UIImage(named: "instagram")
+//        return iv
+//    }()
     private let googleImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(named: "google")
         iv.isUserInteractionEnabled = true
         return iv
     }()
-    private let facebookImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(named: "facebook")
-        return iv
-    }()
-    private let whatsappImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(named: "whatsapp")
-        return iv
-    }()
+//    private let facebookImageView: UIImageView = {
+//        let iv = UIImageView()
+//        iv.image = UIImage(named: "facebook")
+//        return iv
+//    }()
+//    private let whatsappImageView: UIImageView = {
+//        let iv = UIImageView()
+//        iv.image = UIImage(named: "whatsapp")
+//        return iv
+//    }()
     private let redirectionToSignUpLabel: UILabel = {
         let lb = UILabel()
         lb.text = "Don’t have an account? Sign Up"
@@ -187,10 +187,10 @@ class LoginViewController: UIViewController {
             redirectionToSignUpLabel
         ].forEach(alternativeLoginStackView.addArrangedSubview)
         [
-            instagramImageView,
+//            instagramImageView,
             googleImageView,
-            facebookImageView,
-            whatsappImageView
+//            facebookImageView,
+//            whatsappImageView
         ].forEach(optionsStackView.addArrangedSubview)
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).inset(28)

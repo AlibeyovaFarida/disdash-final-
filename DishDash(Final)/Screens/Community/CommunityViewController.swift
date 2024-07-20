@@ -12,6 +12,12 @@ class CommunityViewController: UIViewController {
         .init(name: "Newest", isSelected: false),
         .init(name: "Oldest", isSelected: false)
     ]
+    private let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+        return spinner
+    }()
     private let filterCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -60,10 +66,14 @@ class CommunityViewController: UIViewController {
     }
     
     private func setupUI() {
+        view.addSubview(activityIndicator)
         view.addSubview(filterCollectionView)
         view.addSubview(communityCollectionView)
         view.addSubview(bottomShadowImageView)
-        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         filterCollectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalTo(view.safeAreaLayoutGuide)
@@ -81,6 +91,7 @@ class CommunityViewController: UIViewController {
     }
     
     private func fetchDataBasedOnFilter() {
+        activityIndicator.startAnimating()
         let db = Firestore.firestore()
         communityCardList.removeAll()
         communityCollectionView.reloadData()
@@ -117,6 +128,7 @@ class CommunityViewController: UIViewController {
                             ))
                         }
                         self.communityCollectionView.reloadData()
+                        self.activityIndicator.stopAnimating()
                     }
                 }
                 break
@@ -124,6 +136,7 @@ class CommunityViewController: UIViewController {
         }
     }
     private func fetchFavorites() {
+        activityIndicator.startAnimating()
         let db = Firestore.firestore()
         db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
             if let error = error {
@@ -134,6 +147,7 @@ class CommunityViewController: UIViewController {
                 }
                 DispatchQueue.main.async {
                     self.communityCollectionView.reloadData()
+                    self.activityIndicator.stopAnimating()
                 }
             }
         }

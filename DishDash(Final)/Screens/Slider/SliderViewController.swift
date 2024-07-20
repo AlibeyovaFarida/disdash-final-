@@ -88,6 +88,16 @@ class SliderViewController: UIViewController {
             let indexPath = IndexPath(item: previousIndex, section: 0)
             sliderCollectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         }
+        if previousIndex == 0 {
+            cookingLevelButton.isHidden = false
+            allergicButton.isHidden = true
+            preferencesButtonStackView.isHidden = true
+        }
+        if previousIndex == 1 {
+            preferencesButtonStackView.isHidden = false
+            cookingLevelButton.isHidden = true
+            allergicButton.isHidden = true
+        }
         if previousIndex == -1 {
             navigationController?.popViewController(animated: true)
         }

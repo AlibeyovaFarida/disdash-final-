@@ -37,7 +37,7 @@ final class CustomTabBarController: RevolvTabBar {
     }
     override var tabBarBackgroundColor: UIColor? {
             return UIColor(named: "RedPinkMain")
-        }
+    }
     override var viewControllers: [UIViewController] {
         [homeNavVc, categoriesNavVc, communityNavVc, profileNavVc]
     }
