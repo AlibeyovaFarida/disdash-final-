@@ -204,7 +204,7 @@ extension CommunityViewController: UICollectionViewDataSource {
         }
         if collectionView == communityCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CommunityCardCollectionViewCell.identifier, for: indexPath) as! CommunityCardCollectionViewCell
-            var recipe = communityCardList[indexPath.row]
+            let recipe = communityCardList[indexPath.row]
             let isFavorite = favoriteRecipes.contains(recipe.recipeName)
             cell.configure(recipe, isFavorite)
             cell.favoriteButtonTapped = {

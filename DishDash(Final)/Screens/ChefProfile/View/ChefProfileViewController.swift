@@ -9,11 +9,9 @@ import UIKit
 import Firebase
 
 class ChefProfileViewController: UIViewController {
-    private var chefUsername: String = ""
-    private let chefCollectionRecipesList: [ChefCollectionRecipesModel] = [
-        .init(image: "asian-heritage", name: "Salty"),
-        .init(image: "guilty-pleasures", name: "Sweet")
-    ]
+    
+    private var viewModel: ChefProfileViewModel
+
     private let chefProfileStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .horizontal
@@ -180,19 +178,7 @@ class ChefProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(chefUsername, "hello")
-        let db = Firestore.firestore()
-        db.collection("chefs").whereField("username", isEqualTo: chefUsername).getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                for document in querySnapshot!.documents{
-                    self.chefProfileImageView.kf.setImage(with: URL(string: document.data()["image"] as! String))
-                    self.chefNameLabel.text = "\(document.data()["name"] as! String) \(document.data()["surname"] as! String)"
-                    self.navigationItem.title = "@\( document.data()["username"] as! String)"
-                }
-            }
-        }
+        
         if let navigationBar = self.navigationController?.navigationBar {
             let textAttributes: [NSAttributedString.Key: Any] = [
                 .foregroundColor: UIColor(named: "RedPinkMain")!
@@ -204,6 +190,8 @@ class ChefProfileViewController: UIViewController {
         chefCollectionsRecipesCollectionView.dataSource = self
         chefCollectionsRecipesCollectionView.delegate = self
         setupUI()
+        setupBindings()
+        viewModel.fetchChefProfile()
     }
     private func setupCustomBackButton() {
         guard let backButtonImage = UIImage(named: "back-button") else {
@@ -228,8 +216,8 @@ class ChefProfileViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     init(chefUsername: String) {
+        self.viewModel = ChefProfileViewModel(chefUsername: chefUsername)
         super.init(nibName: nil, bundle: nil)
-        self.chefUsername = chefUsername
     }
     
     required init?(coder: NSCoder) {
@@ -317,20 +305,35 @@ class ChefProfileViewController: UIViewController {
             make.bottom.equalToSuperview()
         }
     }
+    private func setupBindings(){
+        viewModel.didUpdateData = { [weak self] in
+            if let url = self?.viewModel.chefProfileImageView {
+                self?.chefProfileImageView.kf.setImage(with: URL(string: url))
+            }
+            self?.chefNameLabel.text = self?.viewModel.chefName
+            if let username = self?.viewModel.chefUsername {
+                self?.navigationItem.title = "@\(username)"
+            }
+        }
+        
+        viewModel.errorOccured = { [weak self] errorMessage in
+            self?.showAlert(title: "Server error", message: errorMessage)
+        }
+    }
 }
 extension ChefProfileViewController: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let vc = RecipesViewController(categoryName: chefCollectionRecipesList[indexPath.row].name, chefUsername: chefUsername)
+        let vc = RecipesViewController(categoryName: viewModel.chefCollectionRecipesList[indexPath.row].name, chefUsername: viewModel.chefUsername)
         navigationController?.pushViewController(vc, animated: true)
     }
 }
 extension ChefProfileViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return chefCollectionRecipesList.count
+        return viewModel.chefCollectionRecipesList.count
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ChefCollectionRecipesCollectionViewCell.identifier, for: indexPath) as! ChefCollectionRecipesCollectionViewCell
-        cell.configure(chefCollectionRecipesList[indexPath.row])
+        cell.configure(viewModel.chefCollectionRecipesList[indexPath.row])
         return cell
     }
 }

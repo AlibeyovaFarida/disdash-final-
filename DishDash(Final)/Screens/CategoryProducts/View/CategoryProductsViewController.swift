@@ -3,19 +3,8 @@ import Firebase
 import FirebaseAuth
 
 class CategoryProductsViewController: UIViewController {
-    private var categoryName: String = ""
-    private var favoriteRecipes: Set<String> = []
-    private let userId = Auth.auth().currentUser?.uid
-    private var categoryNameList: [CategoryNameItemModel] = [
-        .init(name: "Breakfast", isSelected: false),
-        .init(name: "Lunch", isSelected: false),
-        .init(name: "Dinner", isSelected: false),
-        .init(name: "Vegan", isSelected: false),
-        .init(name: "Dessert", isSelected: false),
-        .init(name: "Drinks", isSelected: false),
-        .init(name: "Sea Food", isSelected: false)
-    ]
-    private var categoryProductsList: [RecipeModel] = []
+
+    private var viewModel: CategoryProductsViewModel
     private let activityIndicator: UIActivityIndicatorView = {
         let spinner = UIActivityIndicatorView(style: .large)
         spinner.translatesAutoresizingMaskIntoConstraints = false
@@ -49,8 +38,8 @@ class CategoryProductsViewController: UIViewController {
     private let bottomShadowImageView = BottomShadowImageView()
     
     init(categoryName: String){
+        self.viewModel = CategoryProductsViewModel(categoryName: categoryName)
         super.init(nibName: nil, bundle: nil)
-        self.categoryName = categoryName
     }
     
     required init?(coder: NSCoder) {
@@ -59,8 +48,9 @@ class CategoryProductsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchRecipes()
-        fetchFavorites()
+        setupBinding()
+        viewModel.fetchRecipes()
+        viewModel.fetchFavorites()
         setupCustomBackButton()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         categoryListCollectionView.backgroundColor = .clear
@@ -69,7 +59,7 @@ class CategoryProductsViewController: UIViewController {
         categoryListCollectionView.delegate = self
         categoryProductsCollectionView.dataSource = self
         categoryProductsCollectionView.delegate = self
-        navigationItem.title = categoryName
+        navigationItem.title = viewModel.categoryNameList.first(where: {$0.isSelected})?.name
         if let navigationBar = self.navigationController?.navigationBar {
             let textAttributes: [NSAttributedString.Key: Any] = [
                 .foregroundColor: UIColor(named: "RedPinkMain")!
@@ -78,6 +68,23 @@ class CategoryProductsViewController: UIViewController {
         }
         setupUI()
         navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
+    private func setupBinding(){
+        viewModel.didUpdateData = { [weak self] in
+            DispatchQueue.main.async {
+                self?.categoryProductsCollectionView.reloadData()
+                self?.categoryListCollectionView.reloadData()
+                self?.activityIndicator.stopAnimating()
+            }
+        }
+        
+        viewModel.didReceiveError = { [weak self] error in
+            DispatchQueue.main.async {
+                self?.showAlert(title: "Server error", message: error)
+                self?.activityIndicator.stopAnimating()
+            }
+        }
     }
     
     private func setupCustomBackButton() {
@@ -102,85 +109,6 @@ class CategoryProductsViewController: UIViewController {
     @objc
     private func didTapBackButton() {
         navigationController?.popViewController(animated: true)
-    }
-    
-    private func fetchRecipes() {
-        self.activityIndicator.startAnimating()
-        let db = Firestore.firestore()
-        for (index, _) in self.categoryNameList.enumerated(){
-            categoryNameList[index].isSelected = categoryName == categoryNameList[index].name
-        }
-        db.collection("recipes").whereField("category", isEqualTo: categoryName).getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Error", message: error.localizedDescription)
-            } else {
-                self.categoryProductsList.removeAll()
-                for document in querySnapshot!.documents {
-                    self.categoryProductsList.append(RecipeModel(
-                        name: document.data()["name"] as! String,
-                        image: document.data()["image"] as! String,
-                        description: document.data()["description"] as! String,
-                        rating: document.data()["rating"] as! Int,
-                        cookingTime: document.data()["cookingTime"] as! String,
-                        taste: document.data()["taste"] as! String
-                    ))
-                }
-                DispatchQueue.main.async {
-                    self.categoryProductsCollectionView.reloadData()
-                    self.categoryListCollectionView.reloadData()
-                    self.activityIndicator.stopAnimating()
-                }
-            }
-        }
-    }
-    
-    private func fetchFavorites() {
-        let db = Firestore.firestore()
-        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                self.favoriteRecipes.removeAll()
-                for document in querySnapshot!.documents {
-                    self.favoriteRecipes.insert(document.documentID)
-                }
-                DispatchQueue.main.async {
-                    self.categoryProductsCollectionView.reloadData()
-                }
-            }
-        }
-    }
-
-    private func toggleFavorite(for recipe: RecipeModel) {
-        let db = Firestore.firestore()
-        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.name)
-        
-        if favoriteRecipes.contains(recipe.name) {
-            recipeDocRef.delete { error in
-                if let error = error {
-                    self.showAlert(title: "Server error", message: error.localizedDescription)
-                } else {
-                    self.favoriteRecipes.remove(recipe.name)
-                    self.categoryProductsCollectionView.reloadData()
-                }
-            }
-        } else {
-            recipeDocRef.setData([
-                "name": recipe.name,
-                "image": recipe.image,
-                "description": recipe.description,
-                "rating": recipe.rating,
-                "cookingTime": recipe.cookingTime,
-                "taste": recipe.taste
-            ]) { error in
-                if let error = error {
-                    self.showAlert(title: "Server error", message: error.localizedDescription)
-                } else {
-                    self.favoriteRecipes.insert(recipe.name)
-                    self.categoryProductsCollectionView.reloadData()
-                }
-            }
-        }
     }
 
     private func setupUI() {
@@ -214,20 +142,13 @@ class CategoryProductsViewController: UIViewController {
 extension CategoryProductsViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == categoryListCollectionView {
-            let selectedCategory = categoryNameList[indexPath.row].name
-            categoryName = selectedCategory
-            navigationItem.title = categoryName
-            categoryNameList = categoryNameList.map { category in
-                var updatedCategory = category
-                updatedCategory.isSelected = category.name == selectedCategory
-                return updatedCategory
-            }
-            collectionView.reloadData()
-            fetchRecipes()
+            let selectedCategory = viewModel.categoryNameList[indexPath.row]
+            viewModel.selectCategory(selectedCategory)
+            navigationItem.title = selectedCategory.name
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         }
         if collectionView == categoryProductsCollectionView {
-            let vc = TrendingRecipesDetailViewController(productName: categoryProductsList[indexPath.row].name)
+            let vc = TrendingRecipesDetailViewController(productName: viewModel.categoryProductsList[indexPath.row].name)
             navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -236,10 +157,10 @@ extension CategoryProductsViewController: UICollectionViewDelegate {
 extension CategoryProductsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == categoryListCollectionView {
-            return categoryNameList.count
+            return viewModel.categoryNameList.count
         }
         if collectionView == categoryProductsCollectionView {
-            return categoryProductsList.count
+            return viewModel.categoryProductsList.count
         }
         return 0
     }
@@ -247,18 +168,18 @@ extension CategoryProductsViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == categoryListCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoryNameCollectionViewCell.identifier, for: indexPath) as! CategoryNameCollectionViewCell
-            let item = categoryNameList[indexPath.row]
-            cell.configure(categoryNameList[indexPath.row])
-            cell.isSelected = item.name == categoryName
+            let item = viewModel.categoryNameList[indexPath.row]
+            cell.configure(item)
+            cell.isSelected = item.name == viewModel.categoryNameList.first(where: {$0.isSelected})?.name
             return cell
         }
         if collectionView == categoryProductsCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecipeCollectionViewCell.identifier, for: indexPath) as! RecipeCollectionViewCell
-            let recipe = categoryProductsList[indexPath.row]
-            let isFavorite = favoriteRecipes.contains(recipe.name)
+            let recipe = viewModel.categoryProductsList[indexPath.row]
+            let isFavorite = viewModel.favoriteRecipes.contains(recipe.name)
             cell.configure(recipe, isFavorite: isFavorite)
             cell.favoriteButtonTapped = {
-                self.toggleFavorite(for: recipe)
+                self.viewModel.toggleFavorite(for: recipe)
             }
             return cell
         }

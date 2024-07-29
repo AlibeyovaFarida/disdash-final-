@@ -9,28 +9,34 @@ import UIKit
 import Firebase
 
 class CategoriesViewController: UIViewController {
-    private var categoriesList: [CategoryItemModel] = []
+    
+    private var viewModel = CategoriesViewModel()
+    
     private let activityIndicator: UIActivityIndicatorView = {
         let spinner = UIActivityIndicatorView(style: .large)
         spinner.translatesAutoresizingMaskIntoConstraints = false
         spinner.hidesWhenStopped = true
         return spinner
     }()
+    
     private let scrollView: UIScrollView = {
         let sv = UIScrollView()
         sv.showsVerticalScrollIndicator = false
         return sv
     }()
+    
     private let contentViewInScroll: UIView = {
         let view = UIView()
         return view
     }()
+    
     private let seafoodCategoryStackView: UIStackView = {
         let sv = UIStackView()
         sv.axis = .vertical
         sv.spacing = 3
         return sv
     }()
+    
     private let seafoodLabel: UILabel = {
         let lb = UILabel()
         lb.font = UIFont(name: "Poppins-Medium", size: 14)
@@ -38,6 +44,7 @@ class CategoriesViewController: UIViewController {
         lb.textAlignment = .center
         return lb
     }()
+    
     private let seafoodImageView: UIImageView = {
         let iv = UIImageView()
         iv.clipsToBounds = true
@@ -45,6 +52,7 @@ class CategoriesViewController: UIViewController {
         iv.isUserInteractionEnabled = true
         return iv
     }()
+    
     private let categoriesCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -58,36 +66,50 @@ class CategoriesViewController: UIViewController {
         cv.isScrollEnabled = false
         return cv
     }()
+    
     private let bottomShadowImageView = BottomShadowImageView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+        bindViewModel()
+        viewModel.fetchcategories()
+    }
+    
+    private func bindViewModel(){
+        viewModel.categoriesUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.categoriesCollectionView.reloadData()
+                self?.activityIndicator.stopAnimating()
+            }
+        }
+        
+        viewModel.seafoodCategoryUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                if let seafoodCategory = self?.viewModel.getSeafoodCategory(){
+                    self?.seafoodLabel.text = seafoodCategory.name
+                    self?.seafoodImageView.kf.setImage(with: URL(string: seafoodCategory.image))
+                }
+            }
+        }
+        
+        viewModel.errorOccured = { [weak self] errorMessage in
+            DispatchQueue.main.async {
+                self?.showAlert(title: "Server error", message: errorMessage)
+            }
+        }
+    }
+    
+    @objc
+    private func didSelectSeafoodCategory(){
+        let vc = CategoryProductsViewController(categoryName: "Sea Food")
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    private func setupUI(){
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didSelectSeafoodCategory))
         seafoodImageView.addGestureRecognizer(tapGesture)
         activityIndicator.startAnimating()
-        let db = Firestore.firestore()
-        db.collection("categories").whereField("name", isEqualTo: "Seafood").getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                for document in querySnapshot!.documents{
-                    self.seafoodLabel.text = (document.data()["name"] as! String)
-                    self.seafoodImageView.kf.setImage(with: URL(string: document.data()["image"] as! String))
-                }
-            }
-        }
-        db.collection("categories").whereField("name", isNotEqualTo: "Seafood").getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                for document in querySnapshot!.documents{
-                    self.categoriesList.append(CategoryItemModel(image: document.data()["image"] as! String, name: document.data()["name"] as! String))
-                }
-                DispatchQueue.main.async {
-                    self.categoriesCollectionView.reloadData()
-                    self.activityIndicator.stopAnimating()
-                }
-            }
-        }
         
         navigationItem.title = "Categories"
         if let navigationBar = self.navigationController?.navigationBar {
@@ -97,16 +119,10 @@ class CategoriesViewController: UIViewController {
             navigationBar.titleTextAttributes = textAttributes
         }
         view.backgroundColor = UIColor(named: "WhiteBeige")
+        
         categoriesCollectionView.dataSource = self
         categoriesCollectionView.delegate = self
-        setupUI()
-    }
-    @objc
-    private func didSelectSeafoodCategory(){
-        let vc = CategoryProductsViewController(categoryName: "Sea Food")
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    private func setupUI(){
+        
         view.addSubview(scrollView)
         view.addSubview(activityIndicator)
         scrollView.addSubview(contentViewInScroll)
@@ -144,19 +160,23 @@ class CategoriesViewController: UIViewController {
         }
     }
 }
+
 extension CategoriesViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categoriesList.count
+        return viewModel.getCategoriesCount()
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CategoriesCollectionViewCell.identifier, for: indexPath) as! CategoriesCollectionViewCell
-        cell.configure(categoriesList[indexPath.row])
+        let category = viewModel.getCategory(at: indexPath.row)
+        cell.configure(category)
         return cell
     }
 }
+
 extension CategoriesViewController: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let vc = CategoryProductsViewController(categoryName: categoriesList[indexPath.row].name)
+        let category = viewModel.getCategory(at: indexPath.row)
+        let vc = CategoryProductsViewController(categoryName: category.name)
         navigationController?.pushViewController(vc, animated: true)
     }
 }
