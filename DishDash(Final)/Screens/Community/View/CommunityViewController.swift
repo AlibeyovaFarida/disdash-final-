@@ -3,15 +3,8 @@ import Firebase
 import FirebaseAuth
 
 class CommunityViewController: UIViewController {
-
-    private var communityCardList: [CommunityCardModel] = []
-    private var favoriteRecipes: Set<String> = []
-    private let userId = Auth.auth().currentUser?.uid
-    private var filterList: [FilterChoiseModel] = [
-        .init(name: "Top Recipes", isSelected: true),
-        .init(name: "Newest", isSelected: false),
-        .init(name: "Oldest", isSelected: false)
-    ]
+    private var viewModel = CommunityViewModel()
+    
     private let activityIndicator: UIActivityIndicatorView = {
         let spinner = UIActivityIndicatorView(style: .large)
         spinner.translatesAutoresizingMaskIntoConstraints = false
@@ -46,8 +39,8 @@ class CommunityViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchDataBasedOnFilter()
-        fetchFavorites()
+        viewModel.fetchDataBasedOnFilter()
+        viewModel.fetchFavorites()
         view.backgroundColor = UIColor(named: "WhiteBeige")
         navigationItem.title = "Community"
         if let navigationBar = self.navigationController?.navigationBar {
@@ -61,8 +54,9 @@ class CommunityViewController: UIViewController {
         communityCollectionView.dataSource = self
         communityCollectionView.delegate = self
         setupUI()
-        fetchDataBasedOnFilter()
-        fetchFavorites()
+        setupBindings()
+        viewModel.fetchDataBasedOnFilter()
+        viewModel.fetchFavorites()
     }
     
     private func setupUI() {
@@ -90,97 +84,27 @@ class CommunityViewController: UIViewController {
         }
     }
     
-    private func fetchDataBasedOnFilter() {
-        activityIndicator.startAnimating()
-        let db = Firestore.firestore()
-        communityCardList.removeAll()
-        communityCollectionView.reloadData()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        for filterOption in filterList {
-            if filterOption.isSelected {
-                let query: Query
-                if filterOption.name == "Newest" {
-                    query = db.collection("recipes").order(by: "date", descending: true)
-                } else if filterOption.name == "Oldest" {
-                    query = db.collection("recipes").order(by: "date", descending: false)
-                } else {
-                    query = db.collection("recipes").order(by: "rating", descending: true)
-                }
-                
-                query.getDocuments { querySnapshot, error in
-                    if let error = error {
-                        self.showAlert(title: "Server error", message: error.localizedDescription)
-                    } else {
-                        for document in querySnapshot!.documents {
-                            let chef = document.data()["chef"] as! [String : String]
-                            self.communityCardList.append(CommunityCardModel(
-                                authorImage: chef["image"]!,
-                                username: chef["username"]!,
-                                time: document.data()["date"] as? Date ?? Date(),
-                                recipeImage: document.data()["image"] as! String,
-                                recipeName: document.data()["name"] as! String,
-                                rating: document.data()["rating"] as! Int,
-                                description: document.data()["details"] as! String,
-                                cookingTime: document.data()["cookingTime"] as! String,
-                                comment: 0,
-                                taste: document.data()["taste"] as! String
-                            ))
-                        }
-                        self.communityCollectionView.reloadData()
-                        self.activityIndicator.stopAnimating()
-                    }
-                }
-                break
+    private func setupBindings(){
+        viewModel.didUpdateData = { [weak self] in
+            DispatchQueue.main.async {
+                self?.communityCollectionView.reloadData()
+                self?.activityIndicator.stopAnimating()
             }
         }
-    }
-    private func fetchFavorites() {
-        activityIndicator.startAnimating()
-        let db = Firestore.firestore()
-        db.collection("users").document(userId ?? "").collection("favorites").getDocuments { querySnapshot, error in
-            if let error = error {
-                self.showAlert(title: "Server error", message: error.localizedDescription)
-            } else {
-                for document in querySnapshot!.documents {
-                    self.favoriteRecipes.insert(document.documentID)
-                }
-                DispatchQueue.main.async {
-                    self.communityCollectionView.reloadData()
-                    self.activityIndicator.stopAnimating()
-                }
-            }
-        }
-    }
-    private func toggleFavorite(for recipe: CommunityCardModel) {
-        let db = Firestore.firestore()
-        let recipeDocRef = db.collection("users").document(userId ?? "").collection("favorites").document(recipe.recipeName)
         
-        if favoriteRecipes.contains(recipe.recipeName) {
-            recipeDocRef.delete { error in
-                if let error = error {
-                    self.showAlert(title: "Server error", message: error.localizedDescription)
-                } else {
-                    self.favoriteRecipes.remove(recipe.recipeName)
-                    self.communityCollectionView.reloadData()
-                }
+        viewModel.didReceiveError = { [weak self] error in
+            DispatchQueue.main.async {
+                self?.showAlert(title: "Server error", message: error)
+                self?.activityIndicator.stopAnimating()
             }
+        }
+    }
+    
+    private func showLoading(_ show: Bool){
+        if show {
+            activityIndicator.startAnimating()
         } else {
-            recipeDocRef.setData([
-                "name": recipe.recipeName,
-                "image": recipe.recipeImage,
-                "description": recipe.description,
-                "rating": recipe.rating,
-                "cookingTime": recipe.cookingTime,
-                "taste": recipe.taste
-            ]) { error in
-                if let error = error {
-                    self.showAlert(title: "Server error", message: error.localizedDescription)
-                } else {
-                    self.favoriteRecipes.insert(recipe.recipeName)
-                    self.communityCollectionView.reloadData()
-                }
-            }
+            activityIndicator.stopAnimating()
         }
     }
 }
@@ -188,10 +112,10 @@ class CommunityViewController: UIViewController {
 extension CommunityViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == filterCollectionView {
-            return filterList.count
+            return viewModel.getFilters().count
         }
         if collectionView == communityCollectionView {
-            return communityCardList.count
+            return  viewModel.getCommunityCardList().count
         }
         return 0
     }
@@ -199,16 +123,16 @@ extension CommunityViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == filterCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCollectionViewCell.identifier, for: indexPath) as! FilterCollectionViewCell
-            cell.configure(filterList[indexPath.row])
+            cell.configure(viewModel.getFilters()[indexPath.row])
             return cell
         }
         if collectionView == communityCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CommunityCardCollectionViewCell.identifier, for: indexPath) as! CommunityCardCollectionViewCell
-            let recipe = communityCardList[indexPath.row]
-            let isFavorite = favoriteRecipes.contains(recipe.recipeName)
+            let recipe = viewModel.getCommunityCardList()[indexPath.row]
+            let isFavorite = viewModel.isFavorite(recipeName: recipe.recipeName)
             cell.configure(recipe, isFavorite)
             cell.favoriteButtonTapped = {
-                self.toggleFavorite(for: recipe)
+                self.viewModel.toggleFavorite(for: recipe)
             }
             return cell
         }
@@ -220,14 +144,12 @@ extension CommunityViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == filterCollectionView {
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-            for (index, _) in filterList.enumerated() {
-                filterList[index].isSelected = (index == indexPath.row)
-            }
+            viewModel.selectFilter(at: indexPath.row)
             filterCollectionView.reloadData()
-            fetchDataBasedOnFilter()
+            self.viewModel.fetchDataBasedOnFilter()
         }
         if collectionView == communityCollectionView {
-            let vc = TrendingRecipesDetailViewController(productName: communityCardList[indexPath.row].recipeName)
+            let vc = TrendingRecipesDetailViewController(productName: viewModel.getCommunityCardList()[indexPath.row].recipeName)
             navigationController?.pushViewController(vc, animated: true)
         }
     }

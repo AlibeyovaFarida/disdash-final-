@@ -9,4 +9,5 @@ struct FollowingProfileItemModel{
     let image: String
     let username: String
     let name: String
+    var isAnimatedDone: Bool = false
 }

@@ -9,7 +9,7 @@ import UIKit
 import Firebase
 
 class ProfileFollowingViewController: UIViewController {
-    private let followingProfileList: [FollowingProfileItemModel] = [
+    private var followingProfileList: [FollowingProfileItemModel] = [
         .init(image: "neil_tran", username: "@neil_tran", name: "Neil Tran-Chef"),
         .init(image: "chef_emily", username: "@chef_emily", name: "Emily Carter"),
         .init(image: "cia_food", username: "@cia_food", name: "Cia Rodriguez"),
@@ -21,7 +21,7 @@ class ProfileFollowingViewController: UIViewController {
         .init(image: "travelfood_", username: "@travelfood_", name: "Derek Hart"),
         .init(image: "jessi_davis", username: "@jessi_davis", name: "Jessica Davis-Chef")
     ]
-    private let followersProfileList: [FollowingProfileItemModel] = [
+    private var followersProfileList: [FollowingProfileItemModel] = [
         .init(image: "sweet.sarah", username: "@sweet.sarah", name: "Sarah Johnson"),
         .init(image: "Moore_Meli", username: "@Moore_Meli", name: "Melissa Moore"),
         .init(image: "miacolors", username: "@miacolors", name: "Mia Davis"),
@@ -216,11 +216,29 @@ extension ProfileFollowingViewController: UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if followingTabBottomLineImageView.tintColor == UIColor(named: "RedPinkMain") {
             let cell = tableView.dequeueReusableCell(withIdentifier: FollowingTableViewCell.identifier, for: indexPath) as! FollowingTableViewCell
+            if !followingProfileList[indexPath.row].isAnimatedDone {
+                cell.alpha = 0
+                cell.transform = CGAffineTransform(translationX: cell.contentView.frame.width, y:cell.contentView.frame.height)
+                UIView.animate(withDuration: 0.3, delay: 0.3*Double(indexPath.row), animations: {
+                        cell.transform = CGAffineTransform(translationX: cell.contentView.frame.width, y: cell.contentView.frame.height)
+                        cell.alpha = 1
+                })
+                followingProfileList[indexPath.row].isAnimatedDone = true
+            }
             cell.configure(followingProfileList[indexPath.row])
             return cell
         }
         if followersTabBottomLineImageView.tintColor == UIColor(named: "RedPinkMain"){
             let cell = tableView.dequeueReusableCell(withIdentifier: FollowersProfileTableViewCell.identifier, for: indexPath) as! FollowersProfileTableViewCell
+            if !followersProfileList[indexPath.row].isAnimatedDone {
+                cell.alpha = 0
+                cell.transform = CGAffineTransform(translationX: cell.contentView.frame.width, y:cell.contentView.frame.height)
+                UIView.animate(withDuration: 0.3, delay: 0.3*Double(indexPath.row), animations: {
+                        cell.transform = CGAffineTransform(translationX: cell.contentView.frame.width, y: cell.contentView.frame.height)
+                        cell.alpha = 1
+                })
+                followersProfileList[indexPath.row].isAnimatedDone = true
+            }
             cell.configure(followersProfileList[indexPath.row])
             return cell
         }
