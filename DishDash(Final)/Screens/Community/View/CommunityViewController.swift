@@ -123,16 +123,20 @@ extension CommunityViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == filterCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCollectionViewCell.identifier, for: indexPath) as! FilterCollectionViewCell
-            cell.configure(viewModel.getFilters()[indexPath.row])
+            if indexPath.row < viewModel.getFilters().count {
+                cell.configure(viewModel.getFilters()[indexPath.row])
+            }
             return cell
         }
         if collectionView == communityCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CommunityCardCollectionViewCell.identifier, for: indexPath) as! CommunityCardCollectionViewCell
-            let recipe = viewModel.getCommunityCardList()[indexPath.row]
-            let isFavorite = viewModel.isFavorite(recipeName: recipe.recipeName)
-            cell.configure(recipe, isFavorite)
-            cell.favoriteButtonTapped = {
-                self.viewModel.toggleFavorite(for: recipe)
+            if indexPath.row < viewModel.getCommunityCardList().count {
+                let recipe = viewModel.getCommunityCardList()[indexPath.row]
+                let isFavorite = viewModel.isFavorite(recipeName: recipe.recipeName)
+                cell.configure(recipe, isFavorite)
+                cell.favoriteButtonTapped = {
+                    self.viewModel.toggleFavorite(for: recipe)
+                }
             }
             return cell
         }
